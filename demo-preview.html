@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YPMMH Dashboard - Demo Preview</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-hue: 260;
+            --primary-sat: 80%;
+            --primary-light: 60%;
+
+            --primary-500: hsl(var(--primary-hue), var(--primary-sat), var(--primary-light));
+            --primary-600: hsl(var(--primary-hue), var(--primary-sat), 50%);
+
+            --bg-primary: #f0f4f8;
+            --text-primary: #1a202c;
+            --text-secondary: #4a5568;
+            --border-color: rgba(203, 213, 225, 0.3);
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.8);
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --border-color: rgba(51, 65, 85, 0.5);
+            --glass-bg: rgba(30, 41, 59, 0.6);
+            --glass-border: rgba(71, 85, 105, 0.5);
+            --shadow-color: rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px 0 var(--shadow-color);
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 280px;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0 !important;
+            }
+        }
+
+        .main-content {
+            margin-left: 280px;
+            transition: margin-left 0.3s ease;
+        }
+
+        .menu-item.active {
+            background: var(--primary-500);
+            color: white;
+        }
+
+        .glass-hover {
+            transition: all 0.3s ease;
+        }
+
+        .glass-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px 0 var(--shadow-color);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-slide-in {
+            animation: slideIn 0.5s ease-out forwards;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1.25rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--primary-500);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-600);
+            transform: translateY(-2px);
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-500);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar glass">
+        <div class="p-6">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-10 h-10 rounded-lg flex items-center justify-center"
+                    style="background: var(--primary-500);">
+                    <i class="fas fa-graduation-cap text-white text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold">YPMMH Admin</h1>
+                    <p class="text-xs" style="color: var(--text-secondary);">Madrasah Dashboard</p>
+                </div>
+            </div>
+
+            <nav>
+                <div class="mb-6">
+                    <h3 class="text-xs font-semibold uppercase tracking-wider mb-3"
+                        style="color: var(--text-secondary);">Main Menu</h3>
+                    <a href="#" class="menu-item active flex items-center gap-3 px-4 py-3 rounded-lg mb-2">
+                        <i class="fas fa-home w-5"></i>
+                        <span class="font-medium">Dashboard</span>
+                    </a>
+                    <a href="#" class="menu-item flex items-center gap-3 px-4 py-3 rounded-lg mb-2 glass-hover"
+                        style="color: var(--text-primary);">
+                        <i class="fas fa-chart-line w-5"></i>
+                        <span class="font-medium">Analytics</span>
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Navbar -->
+        <nav class="glass sticky top-0 z-50 px-6 py-4">
+            <div class="flex items-center justify-between">
+                <button onclick="toggleSidebar()" class="p-2 rounded-lg glass-hover">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleTheme()" id="themeToggle" class="p-3 rounded-lg glass-hover">
+                        <i class="fas fa-moon text-lg"></i>
+                    </button>
+
+                    <div class="flex items-center gap-3 p-2 rounded-lg">
+                        <img src="https://ui-avatars.com/api/?name=Admin+User&background=8b5cf6&color=fff" alt="Admin"
+                            class="w-10 h-10 rounded-full">
+                        <div class="text-left hidden md:block">
+                            <p class="font-semibold text-sm">Admin User</p>
+                            <p class="text-xs" style="color: var(--text-secondary);">Administrator</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Content -->
+        <main class="p-6 min-h-screen">
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold mb-2">Dashboard Overview</h1>
+                <p style="color: var(--text-secondary);">Welcome! This is a demo of the glassmorphism dashboard.</p>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="glass rounded-xl p-6 glass-hover animate-slide-in">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 rounded-lg flex items-center justify-center"
+                            style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <i class="fas fa-user-graduate text-white text-xl"></i>
+                        </div>
+                        <span class="badge badge-success">+12%</span>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-1">1,248</h3>
+                    <p class="text-sm" style="color: var(--text-secondary);">Total Students</p>
+                </div>
+
+                <div class="glass rounded-xl p-6 glass-hover animate-slide-in" style="animation-delay: 0.1s;">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 rounded-lg flex items-center justify-center"
+                            style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                            <i class="fas fa-chalkboard-teacher text-white text-xl"></i>
+                        </div>
+                        <span class="badge badge-warning">Active</span>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-1">84</h3>
+                    <p class="text-sm" style="color: var(--text-secondary);">Total Teachers</p>
+                </div>
+
+                <div class="glass rounded-xl p-6 glass-hover animate-slide-in" style="animation-delay: 0.2s;">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 rounded-lg flex items-center justify-center"
+                            style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                            <i class="fas fa-money-bill-wave text-white text-xl"></i>
+                        </div>
+                        <span class="badge badge-success">+8%</span>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-1">RM 45,280</h3>
+                    <p class="text-sm" style="color: var(--text-secondary);">Monthly Revenue</p>
+                </div>
+
+                <div class="glass rounded-xl p-6 glass-hover animate-slide-in" style="animation-delay: 0.3s;">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 rounded-lg flex items-center justify-center"
+                            style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                            <i class="fas fa-chart-line text-white text-xl"></i>
+                        </div>
+                        <span class="badge badge-warning">-2%</span>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-1">92.5%</h3>
+                    <p class="text-sm" style="color: var(--text-secondary);">Attendance Rate</p>
+                </div>
+            </div>
+
+            <!-- Demo Info -->
+            <div class="glass rounded-xl p-8 text-center animate-slide-in" style="animation-delay: 0.4s;">
+                <i class="fas fa-check-circle text-6xl mb-4" style="color: var(--primary-500);"></i>
+                <h2 class="text-2xl font-bold mb-2">Dashboard Preview Ready!</h2>
+                <p class="mb-4" style="color: var(--text-secondary);">
+                    This is a standalone demo. Try toggling the theme with the moon/sun icon!
+                </p>
+                <button onclick="alert('Full features available in Laravel version!')" class="btn btn-primary">
+                    <i class="fas fa-rocket"></i>
+                    Explore Features
+                </button>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="glass px-6 py-4">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <p class="text-sm" style="color: var(--text-secondary);">
+                    © 2026 YPMMH Madrasah. All rights reserved.
+                </p>
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                    <span class="text-xs" style="color: var(--text-secondary);">System Online</span>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Theme Toggle
+        const html = document.documentElement;
+        const themeToggle = document.getElementById('themeToggle');
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+        updateThemeIcon(savedTheme);
+
+        function toggleTheme() {
+            const current = html.getAttribute('data-theme');
+            const newTheme = current === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            const icon = themeToggle.querySelector('i');
+            icon.className = theme === 'dark' ? 'fas fa-sun text-lg' : 'fas fa-moon text-lg';
+        }
+
+        // Sidebar Toggle
+        const sidebar = document.getElementById('sidebar');
+        function toggleSidebar() {
+            sidebar.classList.toggle('open');
+        }
+    </script>
+</body>
+
+</html>
