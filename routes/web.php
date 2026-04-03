@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\CacheController as AdminCacheController;
 use App\Http\Controllers\Admin\ProgramController as AdminProgramController;
 use App\Http\Controllers\Admin\ProgramContentController as AdminProgramContentController;
 use App\Http\Controllers\Admin\CohortController as AdminCohortController;
@@ -142,6 +143,10 @@ Route::middleware(['auth', 'ensure_active'])->group(function () {
     // Admin
     Route::middleware(['role:Admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+        
+        // Cache Management
+        Route::post('cache/clear', [AdminCacheController::class, 'clear'])->name('cache.clear');
+        
         Route::resource('programs', AdminProgramController::class);
         Route::post('programs/{program}/contents', [AdminProgramContentController::class, 'store'])->name('programs.contents.store');
         Route::get('programs/{program}/contents/{content}/edit', [AdminProgramContentController::class, 'edit'])->name('programs.contents.edit');
