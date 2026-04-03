@@ -56,6 +56,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Application Version (for PWA cache invalidation)
+    |--------------------------------------------------------------------------
+    |
+    | This version is used to automatically invalidate caches when deploying
+    | new versions. Increment this on every deployment to force clients to
+    | update. Format: semantic versioning (e.g., "1.2.3")
+    |
+    */
+
+    'version' => env('APP_VERSION', '1.0.0'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |

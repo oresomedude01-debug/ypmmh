@@ -1,15 +1,21 @@
 /**
- * YPMMH Progressive Web App - Service Worker
- * ==========================================
+ * YPMMH Progressive Web App - Service Worker with Dynamic Versioning
+ * ==================================================================
+ * 
  * Caching Strategy:
  *   - Cache First: Static assets (CSS, JS, images, fonts)
  *   - Network First: Dynamic content (HTML pages, API responses)
  *   - Stale While Revalidate: CDN resources (Tailwind, FontAwesome, Google Fonts)
- * 
- * Versioning: Change CACHE_VERSION to force cache invalidation on deploy.
+ *
+ * Versioning: Automatically fetches version from app, invalidates old caches on deploy
+ * Push Notifications: Handles Web Push Protocol notifications from server
  */
 
-const CACHE_VERSION = 'v1.0.0';
+// Version will be pulled from query parameter or fallback to date-based version
+const urlParams = new URLSearchParams(location.search);
+const APP_VERSION = urlParams.get('v') || new Date().toISOString().split('T')[0];
+const CACHE_VERSION = APP_VERSION;
+console.log(`[SW] Service Worker initialized (v${CACHE_VERSION})`);
 const STATIC_CACHE = `YPMMH-static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `YPMMH-dynamic-${CACHE_VERSION}`;
 const CDN_CACHE = `YPMMH-cdn-${CACHE_VERSION}`;
