@@ -29,7 +29,7 @@ if (!function_exists('app_logo')) {
             return asset('storage/' . $logo);
         }
         // Default logo
-        return asset('public/YPMMH_logo-removebg-preview.png');
+        return asset('ypmh_logo-removebg-preview.png');
     }
 }
 
@@ -46,7 +46,7 @@ if (!function_exists('app_favicon')) {
             return asset('storage/' . $favicon);
         }
         // Default favicon
-        return asset('public/YPMMH_logo-removebg-preview.png');
+        return asset('ypmh_logo-removebg-preview.png');
     }
 }
 

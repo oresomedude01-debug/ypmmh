@@ -62,7 +62,7 @@ PWA Smart Install Prompt
                     overflow: hidden;
                     box-shadow: 0 4px 16px rgba(11, 77, 115, 0.2);
                 ">
-                    <img src="/icons/icon-192x192.png" alt="{{ app_name() }}"
+                    <img src="{{ asset('icons/icon-192x192.png') }}" alt="{{ app_name() }}"
                         style="width:100%; height:100%; object-fit:cover;">
                 </div>
                 <h3 id="pwa-install-title" style="

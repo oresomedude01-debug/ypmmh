@@ -12,7 +12,7 @@
     <!-- Google Fonts: Inter for a tech/clean look -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
         rel="stylesheet">
-    <link rel="icon" type="image/png" href="/icons/icon.png">
+    <link rel="icon" type="image/png" href="{{ asset('icons/icon.png') }}">
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -452,7 +452,7 @@
                         </li>
                     @endguest
                     {{-- PWA Install Button (Mobile Menu) --}}
-                    <li class="pwa-mobile-menu-item" style="display:none;">
+                    <li class="pwa-mobile-menu-item">
                         <a id="pwa-mobile-install-btn" onclick="PWAInstallButton.handleClick(); return false;" href="#"
                             class="flex items-center gap-3 py-2.5 px-4 rounded-xl font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition-all">
                             <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -514,7 +514,7 @@
                 </a>
 
                 {{-- PWA Download Button (Hero) --}}
-                <button id="pwa-hero-install-btn" onclick="PWAInstallButton.handleClick()" style="display: none;"
+                <button id="pwa-hero-install-btn" onclick="PWAInstallButton.handleClick()"
                     class="px-7 py-4 rounded-xl font-bold shadow-xl shadow-emerald-500/15 hover:shadow-emerald-500/25 transition-all transform hover:-translate-y-1 flex items-center gap-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
                     <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                         stroke-linecap="round" stroke-linejoin="round">

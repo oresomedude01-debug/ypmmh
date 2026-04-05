@@ -17,6 +17,9 @@
         <!-- Tailwind CSS -->
         <script src="https://cdn.tailwindcss.com"></script>
 
+        <!-- PWA Configuration -->
+        @include('partials.pwa')
+
         <!-- Scripts -->
         @vite(['resources/js/app.js'])
         @inertiaHead

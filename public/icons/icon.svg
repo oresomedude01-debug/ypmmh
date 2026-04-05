@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#0B4D73"/>
+  <circle cx="256" cy="256" r="180" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="3"/>
+  <circle cx="256" cy="220" r="70" fill="#D4AF37"/>
+  <circle cx="277" cy="213" r="60" fill="#0B4D73"/>
+  <polygon points="290,200 294,210 305,210 296,217 299,228 290,221 281,228 284,217 275,210 286,210" fill="#D4AF37"/>
+  <text x="256" y="340" text-anchor="middle" fill="white" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="64">YPMMH</text>
+  <text x="256" y="380" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-family="Arial,Helvetica,sans-serif" font-weight="600" font-size="20">MENTORING HUB</text>
+</svg>

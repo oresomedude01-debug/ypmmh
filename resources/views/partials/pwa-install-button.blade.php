@@ -10,7 +10,7 @@ Mobile button is placed directly in mobile menus
     ============================================ --}}
 
     {{-- Desktop Header Button --}}
-    <button id="pwa-header-install-btn" onclick="PWAInstallButton.handleClick()" style="display: none;" class="pwa-install-header-btn hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 lg:px-4 lg:py-2 rounded-xl text-[10px] lg:text-xs font-bold transition-all duration-300 whitespace-nowrap
+    <button id="pwa-header-install-btn" onclick="PWAInstallButton.handleClick()" class="pwa-install-header-btn hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 lg:px-4 lg:py-2 rounded-xl text-[10px] lg:text-xs font-bold transition-all duration-300 whitespace-nowrap
            bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md shadow-emerald-500/20
            hover:shadow-lg hover:shadow-emerald-500/30 hover:-translate-y-0.5 hover:from-emerald-600 hover:to-teal-600"
         aria-label="Install app">
