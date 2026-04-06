@@ -27,16 +27,16 @@
 
 @section('content')
     <div class="space-y-8 animate-fade-in">
-        <!-- Header -->
+        <!-- Header Section -->
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
                 <h1 class="text-3xl font-black bg-gradient-to-r from-[#0B4D73] to-blue-500 bg-clip-text text-transparent">
                     System Blog
                 </h1>
-                <p class="font-medium" style="color: var(--text-secondary);">Monitor and manage all articles published across the platform.</p>
+                <p class="font-medium" style="color: var(--text-secondary);">Manage all articles and blog contents across the platform</p>
             </div>
             <div class="flex items-center gap-3">
-                <!-- View Toggle -->
+                <!-- View Toggle Toggle -->
                 <div class="hidden lg:flex items-center bg-slate-100 rounded-xl p-1 border border-slate-200">
                     <button onclick="setViewMode('table')" id="table-view-btn"
                         class="px-3 py-2 rounded-lg transition-all duration-200 flex items-center gap-2 text-xs font-bold">
@@ -49,65 +49,116 @@
                         <span>Grid</span>
                     </button>
                 </div>
+
                 <a href="{{ route('admin.blogs.create') }}" class="btn btn-primary shadow-lg shadow-[#0B4D73]/20">
                     <i class="fas fa-plus"></i>
-                    <span>Create New Post</span>
+                    <span>Create Post</span>
                 </a>
             </div>
         </div>
 
         <!-- Stats Grid -->
-        <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div class="analytics-card rounded-2xl p-6 relative overflow-hidden group">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+            <!-- Total Posts -->
+            <div class="admin-card p-4 sm:p-6 relative overflow-hidden group">
                 <div class="relative z-10">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="w-12 h-12 rounded-xl stat-icon-bg bg-blue-50 text-blue-500 flex items-center justify-center text-xl shadow-sm group-hover:scale-110 transition-transform">
+                    <div class="flex items-center justify-between mb-2 sm:mb-4">
+                        <div class="w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center text-sm sm:text-xl shadow-sm group-hover:scale-110 transition-transform">
                             <i class="fas fa-newspaper"></i>
                         </div>
                     </div>
-                    <p class="text-[10px] sm:text-sm font-bold uppercase tracking-wider mb-1" style="color: var(--text-secondary);">Total Posts</p>
-                    <h3 class="text-2xl sm:text-3xl font-black" style="color: var(--text-primary);">{{ $posts->total() }}</h3>
+                    <p class="text-[8px] sm:text-[10px] font-black uppercase tracking-widest mb-0.5 sm:mb-1 truncate" style="color: var(--text-secondary);">
+                        Total Articles</p>
+                    <h3 class="text-xl sm:text-3xl font-black" style="color: var(--text-primary);">{{ $posts->total() }}</h3>
                 </div>
+                <div class="absolute -right-4 -bottom-4 w-16 h-16 sm:w-24 sm:h-24 bg-blue-500/5 rounded-full group-hover:scale-125 transition-transform"></div>
             </div>
 
-            <div class="analytics-card rounded-2xl p-6 relative overflow-hidden group">
+            <!-- Published Posts -->
+            <div class="admin-card p-4 sm:p-6 relative overflow-hidden group border-l-4 border-l-emerald-500">
                 <div class="relative z-10">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="w-12 h-12 rounded-xl stat-icon-bg bg-emerald-50 text-emerald-500 flex items-center justify-center text-xl shadow-sm group-hover:scale-110 transition-transform">
-                            <i class="fas fa-check-double"></i>
+                    <div class="flex items-center justify-between mb-2 sm:mb-4">
+                        <div class="w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center text-sm sm:text-xl shadow-sm group-hover:scale-110 transition-transform">
+                            <i class="fas fa-check-circle"></i>
                         </div>
                     </div>
-                    <p class="text-[10px] sm:text-sm font-bold uppercase tracking-wider mb-1" style="color: var(--text-secondary);">Published</p>
-                    <h3 class="text-2xl sm:text-3xl font-black text-emerald-500">{{ $posts->where('status', 'published')->count() }}</h3>
+                    <p class="text-[8px] sm:text-[10px] font-black uppercase tracking-widest mb-0.5 sm:mb-1 truncate" style="color: var(--text-secondary);">
+                        Published</p>
+                    <h3 class="text-xl sm:text-3xl font-black text-emerald-600">{{ $posts->where('status', 'published')->count() }}</h3>
                 </div>
+                <div class="absolute -right-4 -bottom-4 w-16 h-16 sm:w-24 sm:h-24 bg-emerald-500/5 rounded-full group-hover:scale-125 transition-transform"></div>
             </div>
 
-            <div class="analytics-card rounded-2xl p-6 relative overflow-hidden group">
+            <!-- Draft Posts -->
+            <div class="admin-card p-4 sm:p-6 relative overflow-hidden group border-l-4 border-l-amber-500">
                 <div class="relative z-10">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="w-12 h-12 rounded-xl stat-icon-bg bg-amber-50 text-amber-500 flex items-center justify-center text-xl shadow-sm group-hover:scale-110 transition-transform">
-                            <i class="fas fa-pen-nib"></i>
+                    <div class="flex items-center justify-between mb-2 sm:mb-4">
+                        <div class="w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center text-sm sm:text-xl shadow-sm group-hover:scale-110 transition-transform">
+                            <i class="fas fa-edit"></i>
                         </div>
                     </div>
-                    <p class="text-[10px] sm:text-sm font-bold uppercase tracking-wider mb-1" style="color: var(--text-secondary);">Drafts</p>
-                    <h3 class="text-2xl sm:text-3xl font-black text-amber-500">{{ $posts->where('status', 'draft')->count() }}</h3>
+                    <p class="text-[8px] sm:text-[10px] font-black uppercase tracking-widest mb-0.5 sm:mb-1 truncate" style="color: var(--text-secondary);">
+                        Drafts</p>
+                    <h3 class="text-xl sm:text-3xl font-black text-amber-600">{{ $posts->where('status', 'draft')->count() }}</h3>
                 </div>
+                <div class="absolute -right-4 -bottom-4 w-16 h-16 sm:w-24 sm:h-24 bg-amber-500/5 rounded-full group-hover:scale-125 transition-transform"></div>
             </div>
 
-            <div class="analytics-card rounded-2xl p-6 relative overflow-hidden group">
+            <!-- Total Reads -->
+            <div class="admin-card p-4 sm:p-6 relative overflow-hidden group border-l-4 border-l-purple-500">
                 <div class="relative z-10">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="w-12 h-12 rounded-xl stat-icon-bg bg-purple-50 text-purple-500 flex items-center justify-center text-xl shadow-sm group-hover:scale-110 transition-transform">
+                    <div class="flex items-center justify-between mb-2 sm:mb-4">
+                        <div class="w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center text-sm sm:text-xl shadow-sm group-hover:scale-110 transition-transform">
                             <i class="fas fa-eye"></i>
                         </div>
                     </div>
-                    <p class="text-[10px] sm:text-sm font-bold uppercase tracking-wider mb-1" style="color: var(--text-secondary);">Total Reads</p>
-                    <h3 class="text-2xl sm:text-3xl font-black text-purple-600">{{ number_format($posts->sum('reads')) }}</h3>
+                    <p class="text-[8px] sm:text-[10px] font-black uppercase tracking-widest mb-0.5 sm:mb-1 truncate" style="color: var(--text-secondary);">
+                        Total Reads</p>
+                    <h3 class="text-xl sm:text-3xl font-black text-purple-600">{{ number_format($posts->sum('reads')) }}</h3>
                 </div>
+                <div class="absolute -right-4 -bottom-4 w-16 h-16 sm:w-24 sm:h-24 bg-purple-500/5 rounded-full group-hover:scale-125 transition-transform"></div>
             </div>
         </div>
 
-        <!-- Posts Grid View -->
+        <!-- Filters Section -->
+        <div class="glass rounded-2xl p-6 border shadow-sm" style="border-color: var(--border-color);">
+            <form action="{{ route('admin.blogs.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                <div>
+                    <label class="block text-xs font-black uppercase tracking-widest mb-2" style="color: var(--text-secondary);">Category</label>
+                    <select name="category" class="w-full px-4 py-2.5 rounded-xl border focus:outline-none focus:ring-4 focus:ring-[#0B4D73]/10 transition-all cursor-pointer" style="background-color: var(--bg-primary); border-color: var(--border-color); color: var(--text-primary);">
+                        <option value="">All Categories</option>
+                        @foreach($posts->pluck('category')->unique() as $cat)
+                            <option value="{{ $cat }}" {{ request('category') == $cat ? 'selected' : '' }}>{{ $cat }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-black uppercase tracking-widest mb-2" style="color: var(--text-secondary);">Status</label>
+                    <select name="status" class="w-full px-4 py-2.5 rounded-xl border focus:outline-none focus:ring-4 focus:ring-[#0B4D73]/10 transition-all cursor-pointer" style="background-color: var(--bg-primary); border-color: var(--border-color); color: var(--text-primary);">
+                        <option value="">All Statuses</option>
+                        <option value="draft" {{ request('status') == 'draft' ? 'selected' : '' }}>Draft</option>
+                        <option value="published" {{ request('status') == 'published' ? 'selected' : '' }}>Published</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-black uppercase tracking-widest mb-2" style="color: var(--text-secondary);">Search</label>
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Search title..." class="w-full px-4 py-2.5 rounded-xl border focus:outline-none focus:ring-4 focus:ring-[#0B4D73]/10 transition-all" style="background-color: var(--bg-primary); border-color: var(--border-color); color: var(--text-primary);">
+                </div>
+
+                <div class="flex gap-2">
+                    <button type="submit" class="flex-1 bg-[#0B4D73] text-white rounded-xl py-2.5 font-bold hover:brightness-110 transition-all shadow-sm">
+                        Filter
+                    </button>
+                    <a href="{{ route('admin.blogs.index') }}" class="px-4 py-2.5 border rounded-xl transition-colors flex items-center justify-center" style="border-color: var(--border-color); color: var(--text-secondary);" title="Reset Filters">
+                        <i class="fas fa-undo"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Blogs Grid View -->
         <div id="grid-view" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @forelse($posts as $post)
                 <div class="glass rounded-3xl overflow-hidden border border-slate-100/50 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group flex flex-col">
@@ -144,7 +195,7 @@
                             <span class="text-slate-300">•</span>
                             <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{{ $post->created_at->format('M d, Y') }}</span>
                         </div>
-                        <h4 class="text-lg font-bold text-slate-900 mb-2 group-hover:text-[#0B4D73] transition-colors line-clamp-2">{{ $post->title }}</h4>
+                        <h4 class="text-lg font-bold text-slate-900 mb-2 group-hover:text-[#0B4D73] transition-colors line-clamp-1">{{ $post->title }}</h4>
                         <p class="text-sm text-slate-500 line-clamp-2 mb-4">{{ $post->excerpt }}</p>
 
                         <div class="flex items-center gap-4 py-3 border-t border-slate-100">
@@ -185,12 +236,12 @@
                         <i class="fas fa-newspaper text-4xl text-slate-300"></i>
                     </div>
                     <h3 class="text-2xl font-bold text-slate-900 mb-2">No Articles Found</h3>
-                    <p class="text-slate-500">Initial posts will appear here once created.</p>
+                    <p class="text-slate-500">Articles will appear here once created.</p>
                 </div>
             @endforelse
         </div>
 
-        <!-- Posts Table View -->
+        <!-- Table View -->
         <div id="table-view" class="hidden overflow-x-auto glass rounded-3xl border border-slate-100/50">
             <table class="w-full text-left border-collapse">
                 <thead>
@@ -203,19 +254,18 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-50">
-                    @forelse($posts as $post)
+                    @foreach($posts as $post)
                         <tr class="hover:bg-slate-50/50 transition-colors group">
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-4">
-                                    <div class="w-12 h-8 rounded-lg overflow-hidden bg-slate-100 border border-slate-200">
+                                    <div class="w-12 h-8 rounded-lg overflow-hidden bg-slate-100 border border-slate-200 flex-shrink-0">
                                         <img src="{{ Str::startsWith($post->featured_image, 'http') ? $post->featured_image : asset('storage/' . $post->featured_image) }}"
                                              class="w-full h-full object-cover"
                                              onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode($post->title) }}&color=0B4D73&background=E0F2FE'">
                                     </div>
                                     <div>
                                         <p class="font-bold text-slate-900 leading-none mb-1 group-hover:text-[#0B4D73] line-clamp-1">{{ $post->title }}</p>
-                                        <p class="text-[10px] text-slate-500 mb-1 line-clamp-1 max-w-sm">{{ $post->excerpt }}</p>
-                                        <p class="text-[9px] text-slate-400 font-medium">{{ $post->category }} • {{ $post->created_at->format('M d, Y') }}</p>
+                                        <p class="text-[9px] text-slate-400 font-medium tracking-wide uppercase">{{ $post->category }} • {{ $post->created_at->format('M d, Y') }}</p>
                                     </div>
                                 </div>
                             </td>
@@ -240,38 +290,109 @@
                             </td>
                             <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end gap-2">
-                                    <a href="{{ route('blog.show', $post->slug) }}" target="_blank" class="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all">
+                                    <a href="{{ route('blog.show', $post->slug) }}" target="_blank" class="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all" title="View">
                                         <i class="fas fa-external-link-alt text-sm"></i>
                                     </a>
-                                    <a href="{{ route('admin.blogs.edit', $post->id) }}" class="p-2 text-slate-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition-all">
+                                    <a href="{{ route('admin.blogs.edit', $post->id) }}" class="p-2 text-slate-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition-all" title="Edit">
                                         <i class="fas fa-edit text-sm"></i>
                                     </a>
                                     <form action="{{ route('admin.blogs.destroy', $post->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Delete post?');">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all">
+                                        <button type="submit" class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all" title="Delete">
                                             <i class="fas fa-trash-alt text-sm"></i>
                                         </button>
                                     </form>
                                 </div>
                             </td>
                         </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" class="px-6 py-12 text-center text-slate-500 font-medium">No articles found.</td>
-                        </tr>
-                    @endforelse
+                    @endforeach
                 </tbody>
             </table>
         </div>
 
+        <!-- Mobile List View -->
+        <div class="lg:hidden space-y-3">
+            @forelse($posts as $post)
+                <div class="admin-card p-4 flex flex-col gap-3 rounded-2xl glass border border-slate-100/50 relative overflow-hidden group">
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-center gap-3">
+                            <!-- Image Icon -->
+                            <div class="w-10 h-10 shrink-0 rounded-xl overflow-hidden bg-slate-100 border border-slate-200/50">
+                                <img src="{{ Str::startsWith($post->featured_image, 'http') ? $post->featured_image : asset('storage/' . $post->featured_image) }}"
+                                     class="w-full h-full object-cover"
+                                     onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode($post->title) }}&color=0B4D73&background=E0F2FE'">
+                            </div>
+                            <!-- Info -->
+                            <div class="min-w-0">
+                                <h4 class="font-bold text-sm text-slate-900 truncate tracking-tight">
+                                    {{ $post->title }}
+                                </h4>
+                                <span class="inline-block mt-0.5 px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[8px] font-black uppercase tracking-widest border border-slate-200">
+                                    {{ $post->category }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Footer/Actions -->
+                    <div class="flex items-center justify-between pt-3 border-t border-slate-100/50">
+                        <div class="flex items-center gap-2">
+                            <!-- Status -->
+                            @if($post->status === 'published')
+                                <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border bg-emerald-50 text-emerald-600 border-emerald-100">Published</span>
+                            @else
+                                <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border bg-amber-50 text-amber-600 border-amber-100">Draft</span>
+                            @endif
+                            
+                            <!-- Reads Count -->
+                            <div class="flex items-center gap-1 text-[10px] font-bold text-slate-500 bg-slate-50 px-2 py-1 rounded-md border border-slate-100">
+                                <i class="fas fa-eye text-[#0B4D73]"></i>
+                                {{ number_format($post->reads) }}
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="flex items-center gap-1 shrink-0">
+                            <a href="{{ route('blog.show', $post->slug) }}" target="_blank"
+                                class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 text-slate-500 hover:bg-slate-100 hover:text-blue-600 transition-colors border border-slate-100">
+                                <i class="fas fa-external-link-alt text-xs"></i>
+                            </a>
+                            <a href="{{ route('admin.blogs.edit', $post->id) }}"
+                                class="w-8 h-8 flex items-center justify-center rounded-lg bg-blue-50 text-blue-500 border border-blue-100">
+                                <i class="fas fa-edit text-xs"></i>
+                            </a>
+                            <form action="{{ route('admin.blogs.destroy', $post->id) }}" method="POST" onsubmit="return confirm('Delete post?');" class="contents">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="w-8 h-8 flex items-center justify-center rounded-lg bg-red-50 text-red-500 border border-red-100">
+                                    <i class="fas fa-trash-alt text-xs"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="glass rounded-3xl p-8 sm:p-16 text-center border-2 border-dashed border-slate-200">
+                    <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-newspaper text-3xl text-slate-300"></i>
+                    </div>
+                    <h3 class="text-lg font-black text-slate-900 mb-1">No Articles Found</h3>
+                    <p class="text-xs font-medium text-slate-500">Articles will appear here once created.</p>
+                </div>
+            @endforelse
+        </div>
+
+        <!-- Pagination -->
         @if($posts->hasPages())
-            <div class="pt-4">
+            <div class="pt-6 pb-2 border-t mt-6" style="border-color: var(--border-color);">
                 {{ $posts->links() }}
             </div>
         @endif
     </div>
+@endsection
 
+@section('scripts')
     <script>
         function setViewMode(mode) {
             const gridView = document.getElementById('grid-view');
