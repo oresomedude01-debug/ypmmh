@@ -6,7 +6,55 @@ The PWA version and cache invalidation system has been fully implemented and is 
 
 ---
 
-## 📋 Pre-Deployment Checklist
+## �️ Production Error Handling & Security
+
+### **Enable Custom Error Pages**
+
+To hide sensitive error information in production and show friendly error pages:
+
+1. **Update your production .env file:**
+
+```bash
+# Production Settings
+APP_ENV=production
+APP_DEBUG=false
+APP_DEBUG_HIDE_SENSITIVE_DETAILS=true
+APP_URL=https://yourdomain.com
+```
+
+2. **Verify custom error pages exist in:**
+   - `resources/views/errors/401.blade.php` - Unauthorized
+   - `resources/views/errors/403.blade.php` - Access Denied
+   - `resources/views/errors/404.blade.php` - Not Found
+   - `resources/views/errors/500.blade.php` - Server Error
+   - `resources/views/errors/503.blade.php` - Service Unavailable
+
+3. **Clear application caches after deployment:**
+
+```bash
+php artisan config:cache
+php artisan view:cache
+php artisan cache:clear
+```
+
+### **What Gets Hidden in Production**
+- Exception details and stack traces
+- File paths and line numbers
+- Database query information
+- Environment variables
+- Sensitive server configuration
+
+### **Errors are Still Logged**
+All errors are logged to: `storage/logs/laravel.log`
+
+You can monitor errors via:
+```bash
+tail -f storage/logs/laravel.log
+```
+
+---
+
+## �📋 Pre-Deployment Checklist
 
 ### 1. **Update Your .env File**
 

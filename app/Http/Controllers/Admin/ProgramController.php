@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Program;
 use App\Models\User;
+use App\Notifications\NewProgramAlertNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 use App\Services\AutoAssignChildService;
 
 
@@ -140,6 +142,22 @@ class ProgramController extends Controller
             app(AutoAssignChildService::class)->syncAllChildren();
         }
 
+        // Notify Parents and Children when a new active program is created
+        if ($program->status === 'active') {
+            try {
+                $parents = User::role('Parent')->get();
+                if ($parents->count() > 0) {
+                    Notification::send($parents, new NewProgramAlertNotification($program));
+                }
+                $children = User::role('Child')->get();
+                if ($children->count() > 0) {
+                    Notification::send($children, new NewProgramAlertNotification($program));
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Program alert notification error: ' . $e->getMessage());
+            }
+        }
+
         return redirect()
             ->route('admin.programs.edit', $program)
             ->with('success', 'Program created successfully.');
@@ -261,11 +279,28 @@ class ProgramController extends Controller
 
         $validated['is_featured'] = $request->has('is_featured');
 
+        $wasNotActive = $program->status !== 'active';
         $program->update($validated);
 
         // If a program status or age target changes, sync rolling programs for all children
         if ($program->type === 'rolling') {
             app(AutoAssignChildService::class)->syncAllChildren();
+        }
+
+        // Notify Parents and Children when a program is newly activated
+        if ($wasNotActive && $program->fresh()->status === 'active') {
+            try {
+                $parents = User::role('Parent')->get();
+                if ($parents->count() > 0) {
+                    Notification::send($parents, new NewProgramAlertNotification($program));
+                }
+                $children = User::role('Child')->get();
+                if ($children->count() > 0) {
+                    Notification::send($children, new NewProgramAlertNotification($program));
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Program activate notification error: ' . $e->getMessage());
+            }
         }
 
         return redirect()

@@ -971,16 +971,36 @@
             let initialLoad = true;
 
             function checkNotifications() {
-                fetch('{{ route('api.notifications.unread') }}')
+                fetch('{{ route('api.notifications.unread') }}', {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                    }
+                })
                     .then(response => response.json())
                     .then(data => {
+                        // Update bell badge counters (add data-notification-badge to bell icons)
+                        document.querySelectorAll('[data-notification-badge]').forEach(badge => {
+                            if (data.unread_count > 0) {
+                                badge.textContent = data.unread_count > 9 ? '9+' : data.unread_count;
+                                badge.classList.remove('hidden');
+                            } else {
+                                badge.classList.add('hidden');
+                            }
+                        });
+
                         if (data.unread_count > 0 && data.latest) {
                             if (lastNotificationId !== data.latest.id) {
                                 lastNotificationId = data.latest.id;
 
-                                // Only show toast if it's a NEW notification after page load
+                                // Only show toast for NEW notifications after initial page load
                                 if (!initialLoad) {
-                                    showToast(data.latest.data.message || 'New notification', data.latest.data.type);
+                                    const n = data.latest.data;
+                                    showNotificationToast(
+                                        n.message || 'You have a new notification.',
+                                        n.type    || 'info',
+                                        n.icon    || 'fas fa-bell'
+                                    );
                                 }
                             }
                         }
@@ -989,24 +1009,36 @@
                     .catch(error => console.error('Error fetching notifications:', error));
             }
 
-            function showToast(message, type = 'info') {
+            function showNotificationToast(message, type = 'info', iconClass = 'fas fa-bell') {
                 const container = document.getElementById('toast-container');
-                const toast = document.createElement('div');
-                toast.className = 'pointer-events-auto bg-white/90 backdrop-blur-md border border-slate-100 rounded-2xl shadow-2xl p-4 flex items-center gap-4 animate-fade-in-up transition-all duration-300 transform translate-y-0 opacity-100 min-w-[280px] max-w-sm';
+                if (!container) return;
 
-                let icon = '<i class="fas fa-bell text-blue-500"></i>';
-                if (type === 'chat') icon = '<i class="fas fa-comments text-emerald-500"></i>';
-                if (type === 'achievement') icon = '<i class="fas fa-trophy text-amber-500"></i>';
+                const toast = document.createElement('div');
+
+                // Contextual accent per notification type
+                const colorMap = {
+                    'new_user_registration': ['bg-blue-50',    'text-blue-500',    'border-blue-100'   ],
+                    'new_program_available': ['bg-emerald-50', 'text-emerald-500', 'border-emerald-100' ],
+                    'blog_published':        ['bg-purple-50',  'text-purple-500',  'border-purple-100'  ],
+                    'new_blog_post':         ['bg-indigo-50',  'text-indigo-500',  'border-indigo-100'  ],
+                    'birthday':              ['bg-pink-50',    'text-pink-500',    'border-pink-100'    ],
+                    'report':               ['bg-amber-50',   'text-amber-500',   'border-amber-100'   ],
+                    'program_update':        ['bg-teal-50',    'text-teal-500',    'border-teal-100'    ],
+                };
+
+                const [bg, ic, border] = colorMap[type] || ['bg-slate-50', 'text-[#0B4D73]', 'border-slate-100'];
+
+                toast.className = `pointer-events-auto bg-white/95 backdrop-blur-md border ${border} rounded-2xl shadow-2xl p-4 flex items-start gap-3 animate-fade-in transition-all duration-300 min-w-[290px] max-w-sm`;
 
                 toast.innerHTML = `
-                    <div class="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center shrink-0">
-                        ${icon}
+                    <div class="w-10 h-10 rounded-xl ${bg} flex items-center justify-center shrink-0 mt-0.5">
+                        <i class="${iconClass} ${ic} text-sm"></i>
                     </div>
-                    <div class="flex-1">
-                        <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-0.5">Notification</p>
-                        <p class="text-sm font-bold text-slate-900 leading-tight">${message}</p>
+                    <div class="flex-1 min-w-0 pt-0.5">
+                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">New Notification</p>
+                        <p class="text-sm font-bold text-slate-900 leading-snug line-clamp-2">${message}</p>
                     </div>
-                    <button class="text-slate-300 hover:text-slate-500 transition-colors">
+                    <button class="text-slate-300 hover:text-slate-500 transition-colors shrink-0 mt-0.5" aria-label="Dismiss">
                         <i class="fas fa-times text-xs"></i>
                     </button>
                 `;
@@ -1018,7 +1050,7 @@
 
                 container.appendChild(toast);
 
-                // Auto remove after 8 seconds
+                // Auto-dismiss after 8 seconds
                 setTimeout(() => {
                     if (toast.parentElement) {
                         toast.classList.add('opacity-0', 'translate-y-2');
@@ -1027,9 +1059,9 @@
                 }, 8000);
             }
 
-            // Poll every 10 seconds
-            setInterval(checkNotifications, 10000);
-            // Initial check
+            // Poll every 15 seconds
+            setInterval(checkNotifications, 15000);
+            // Run immediately
             checkNotifications();
         });
     </script>

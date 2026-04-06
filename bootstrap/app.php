@@ -33,7 +33,28 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        // Handle CSRF token mismatch
         $exceptions->render(function (\Illuminate\Session\TokenMismatchException $e, \Illuminate\Http\Request $request) {
             return redirect('/')->with('error', 'Your session expired. Please refresh or try again.');
+        });
+
+        // Render custom error pages in production
+        $exceptions->respond(function (\Symfony\Component\HttpFoundation\Response $response) {
+            // Only render custom pages in production when APP_DEBUG is false
+            if (app()->environment('production') && ! config('app.debug')) {
+                if ($response->getStatusCode() === 404) {
+                    return response()->view('errors.404', [], 404);
+                } elseif ($response->getStatusCode() === 500) {
+                    return response()->view('errors.500', [], 500);
+                } elseif ($response->getStatusCode() === 503) {
+                    return response()->view('errors.503', [], 503);
+                } elseif ($response->getStatusCode() === 403) {
+                    return response()->view('errors.403', [], 403);
+                } elseif ($response->getStatusCode() === 401) {
+                    return response()->view('errors.401', [], 401);
+                }
+            }
+
+            return $response;
         });
     })->create();

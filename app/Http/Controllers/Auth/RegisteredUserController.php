@@ -59,6 +59,19 @@ class RegisteredUserController extends Controller
         $user->unique_number = $prefix . date('Y') . str_pad($user->id, 4, '0', STR_PAD_LEFT);
         $user->save();
 
+        // Notify Admins of new registration
+        try {
+            $admins = User::role('Admin')->get();
+            if ($admins->count() > 0) {
+                \Illuminate\Support\Facades\Notification::send(
+                    $admins,
+                    new \App\Notifications\NewUserJoinedNotification($user)
+                );
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Admin notification error: ' . $e->getMessage());
+        }
+
         try {
             event(new Registered($user));
         } catch (\Exception $e) {

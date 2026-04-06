@@ -124,11 +124,29 @@ Route::middleware(['auth', 'ensure_active'])->group(function () {
     // Shared Catalog Route
     Route::get('programs-catalog', [ParentDashboardController::class, 'programs'])->name('parent.programs.catalog');
 
-    // Notifications Polling
+    // Notifications Polling — only respond to XHR / JSON accept requests
     Route::get('/api/notifications/unread', function () {
+        $request = app(\Illuminate\Http\Request::class);
+
+        // Prevent direct browser navigation showing raw JSON
+        if (!$request->wantsJson() && !$request->ajax()) {
+            return redirect()->route('dashboard');
+        }
+
+        $user = auth()->user();
+        $latest = $user->unreadNotifications->first();
+
         return response()->json([
-            'unread_count' => auth()->user()->unreadNotifications->count(),
-            'latest' => auth()->user()->unreadNotifications->take(1)->first()
+            'unread_count' => $user->unreadNotifications->count(),
+            'latest' => $latest ? [
+                'id'      => $latest->id,
+                'data'    => [
+                    'message' => $latest->data['message'] ?? 'You have a new notification.',
+                    'type'    => $latest->data['type']   ?? 'info',
+                    'icon'    => $latest->data['icon']   ?? 'fas fa-bell',
+                ],
+                'created_at' => $latest->created_at->diffForHumans(),
+            ] : null,
         ]);
     })->name('api.notifications.unread');
 

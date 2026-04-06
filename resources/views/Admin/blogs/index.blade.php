@@ -190,10 +190,14 @@
                         <!-- Content -->
                         <div class="p-6 flex-1">
                             <div class="flex items-center gap-2 mb-3">
-                                <div class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-600 border border-slate-200">
-                                    {{ substr($post->author->name, 0, 1) }}
+                                <div class="w-6 h-6 rounded-full overflow-hidden bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-600 border border-slate-200">
+                                    @if($post->author && $post->author->profile_picture)
+                                        <img src="{{ asset('storage/' . $post->author->profile_picture) }}" class="w-full h-full object-cover">
+                                    @else
+                                        {{ substr($post->author?->first_name ?? $post->author?->name ?? 'A', 0, 1) }}
+                                    @endif
                                 </div>
-                                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{{ $post->author->name }}</span>
+                                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{{ $post->author?->full_name ?? $post->author?->name ?? 'System Admin' }}</span>
                                 <span class="text-slate-300">•</span>
                                 <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{{ $post->created_at->format('M d, Y') }}</span>
                             </div>
@@ -273,10 +277,14 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-2">
-                                        <div class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-600 border border-slate-200">
-                                            {{ substr($post->author->name, 0, 1) }}
+                                        <div class="w-6 h-6 rounded-full overflow-hidden bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-600 border border-slate-200">
+                                            @if($post->author && $post->author->profile_picture)
+                                                <img src="{{ asset('storage/' . $post->author->profile_picture) }}" class="w-full h-full object-cover">
+                                            @else
+                                                {{ substr($post->author?->first_name ?? $post->author?->name ?? 'A', 0, 1) }}
+                                            @endif
                                         </div>
-                                        <span class="text-xs font-bold text-slate-700">{{ $post->author->name }}</span>
+                                        <span class="text-xs font-bold text-slate-700">{{ $post->author?->full_name ?? $post->author?->name ?? 'System Admin' }}</span>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
@@ -331,9 +339,12 @@
                                 <h4 class="font-bold text-[13px] text-slate-900 truncate tracking-tight leading-tight">
                                     {{ $post->title }}
                                 </h4>
-                                <span class="inline-block mt-0.5 px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[7px] font-black uppercase tracking-widest border border-slate-200">
-                                    {{ $post->category }}
-                                </span>
+                                <div class="flex items-center gap-1.5 mt-1">
+                                    <span class="inline-block px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[7px] font-black uppercase tracking-widest border border-slate-200">
+                                        {{ $post->category }}
+                                    </span>
+                                    <span class="text-[8px] font-bold text-slate-400 capitalize">by {{ $post->author?->first_name ?? 'Admin' }}</span>
+                                </div>
                             </div>
                         </div>
                     </div>
