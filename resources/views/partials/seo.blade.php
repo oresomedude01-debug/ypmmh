@@ -1,33 +1,29 @@
 @php
-  $defaultTitle = "YPMMH - Young Productive Muslim Mentoring Hub | Islamic Guidance & Counseling";
-  $defaultDescription = "YPMMH (Young Productive Muslim Mentoring Hub) is Nigeria's leading Islamic mentoring platform for children and young Muslims. Expert counseling, leadership training, and value-based guidance to build confident, purpose-driven youth. Visit ypmmh.com.ng to join today.";
+  $defaultTitle = "YPMMH - Islamic Counseling & Mentorship Hub | Nigeria's Top Youth Guidance Platform";
+  $defaultDescription = "Join YPMMH, Nigeria's premier Islamic mentoring and counseling hub. We offer expert faith-based counseling, leadership training, and Islamic guidance for children and Muslim youth. Find halal therapy and value-based mentoring to build purpose-driven lives.";
   $defaultKeywords = implode(', ', [
-    // Brand name variations (all user-specified searches)
+    // Brand name variations
     "YPMMH", "ypmmh", "YPMH", "ypmh", "PMMH", "pmmh", "YPMM", "ypmm",
-    "ypmmh.com", "YPMMH.com", "ypmmh.com.ng", "YPMMH.com.ng",
-    "ypmh.com", "YPMH.com",
+    "ypmmh.com.ng", "YPMMH platform",
     "young productive muslim mentoring hub",
-    "Young Productive Muslim Mentoring Hub",
-    // Islamic mentorship & counseling
-    "islamic mentorship", "islamic mentoring", "islamic counseling", "islamic guidance",
+    // Counseling & Mental Health (Priority)
+    "Islamic counseling", "Muslim counseling Nigeria", "faith-based counseling",
+    "Islamic therapy", "halal therapy", "Muslim mental health support",
+    "youth counseling services", "child behavior counseling islamic",
+    "pre-marital counseling islam", "therapeutic islamic guidance",
+    "Islamic psychology", "muslim grief counseling", "halal mentorship Nigeria",
+    // Islamic mentorship
+    "islamic mentorship", "islamic mentoring", "islamic guidance",
     "muslim youth mentoring", "muslim children mentoring", "muslim mentorship program",
     "islamic leadership training", "muslim leadership development",
     "quran mentoring", "islamic education platform", "muslim community hub",
-    // Youth & children specific
-    "children counselling Nigeria", "child counseling Nigeria", "youth mentoring Nigeria",
-    "islamic children program", "muslim youth program", "muslim teens mentoring",
-    "young muslims Nigeria", "muslim kids mentorship",
-    // Purpose & values
+    // Location based
+    "children counselling Nigeria", "child counseling Lagos", "youth mentoring Abuja",
+    "islamic children program Nigeria", "muslim youth program Lagos",
+    // Values
     "purpose-driven youth", "value-based education", "character development muslim",
     "islamic values children", "productive muslim", "muslim productivity",
-    // Parenting
-    "muslim parenting Nigeria", "islamic parenting", "raising muslim children",
-    "parenting guidance islamic", "muslim family mentoring",
-    // Platform type
-    "mentoring hub Nigeria", "online islamic mentoring", "islamic counseling platform",
-    "muslim mentoring app", "ypmmh app", "ypmmh platform",
-    // Location
-    "Nigeria islamic mentoring", "Nigeria muslim mentorship", "Nigeria youth counseling",
+    "muslim parenting Nigeria", "islamic parenting guidance",
   ]);
   $defaultImage = asset('images/og-image.jpg');
 
@@ -38,8 +34,7 @@
   $pageImage       = trim($__env->yieldContent('image', $defaultImage));
   $currentUrl      = url()->current();
 
-  // Alternate brand name labels for structured data
-  $alternateNames = ["YPMMH", "YPMH", "PMMH", "YPMM", "ypmmh.com", "ypmh.com", "Young Productive Muslim Mentoring Hub"];
+  $alternateNames = ["YPMMH", "YPMH", "PMMH", "YPMM", "ypmmh.com.ng", "Young Productive Muslim Mentoring Hub", "Islamic Counseling Hub"];
 @endphp
 
 <meta charset="UTF-8">

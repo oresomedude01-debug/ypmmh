@@ -4,9 +4,13 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Post;
+use App\Models\User;
+use App\Notifications\NewBlogPostNotification;
+use App\Notifications\NewBlogPublishedParentNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Notification;
 
 class BlogController extends Controller
 {
@@ -50,7 +54,21 @@ class BlogController extends Controller
             $data['featured_image'] = $request->file('featured_image')->store('blogs', 'public');
         }
 
-        Post::create($data);
+        $post = Post::create($data);
+
+        // Notify Admins (always)
+        $admins = User::role('Admin')->get();
+        if ($admins->count() > 0) {
+            Notification::send($admins, new NewBlogPostNotification($post));
+        }
+
+        // Notify Parents (only if published)
+        if ($request->status === 'published') {
+            $parents = User::role('Parent')->get();
+            if ($parents->count() > 0) {
+                Notification::send($parents, new NewBlogPublishedParentNotification($post));
+            }
+        }
 
         return redirect()->route('admin.blogs.index')->with('success', 'Blog post created successfully.');
     }
@@ -88,8 +106,10 @@ class BlogController extends Controller
         $data = $request->all();
         $data['slug'] = Str::slug($request->title);
 
+        $justPublished = false;
         if ($request->status === 'published' && !$blog->published_at) {
             $data['published_at'] = now();
+            $justPublished = true;
         }
 
         if ($request->hasFile('featured_image')) {
@@ -100,6 +120,20 @@ class BlogController extends Controller
         }
 
         $blog->update($data);
+
+        // Notify Admins on update
+        $admins = User::role('Admin')->get();
+        if ($admins->count() > 0) {
+            Notification::send($admins, new NewBlogPostNotification($blog, true));
+        }
+
+        // Notify Parents if just published (transitioned from draft)
+        if ($justPublished) {
+            $parents = User::role('Parent')->get();
+            if ($parents->count() > 0) {
+                Notification::send($parents, new NewBlogPublishedParentNotification($blog));
+            }
+        }
 
         return redirect()->route('admin.blogs.index')->with('success', 'Blog post updated successfully.');
     }
