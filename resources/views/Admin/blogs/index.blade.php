@@ -26,14 +26,14 @@
 @endsection
 
 @section('content')
-    <div class="space-y-8 animate-fade-in">
+    <div class="space-y-6 md:space-y-8 animate-fade-in">
         <!-- Header Section -->
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-                <h1 class="text-3xl font-black bg-gradient-to-r from-[#0B4D73] to-blue-500 bg-clip-text text-transparent">
+                <h1 class="text-xl md:text-3xl font-black bg-gradient-to-r from-[#0B4D73] to-blue-500 bg-clip-text text-transparent leading-tight">
                     System Blog
                 </h1>
-                <p class="font-medium" style="color: var(--text-secondary);">Manage all articles and blog contents across the platform</p>
+                <p class="text-[10px] md:text-sm font-medium" style="color: var(--text-secondary);">Manage all articles and blog contents across the platform</p>
             </div>
             <div class="flex items-center gap-3">
                 <!-- View Toggle Toggle -->
@@ -50,82 +50,82 @@
                     </button>
                 </div>
 
-                <a href="{{ route('admin.blogs.create') }}" class="btn btn-primary shadow-lg shadow-[#0B4D73]/20">
-                    <i class="fas fa-plus"></i>
-                    <span>Create Post</span>
+                <a href="{{ route('admin.blogs.create') }}" class="btn btn-primary shadow-lg shadow-[#0B4D73]/20 py-2 px-4 md:py-2.5 md:px-5">
+                    <i class="fas fa-plus text-xs md:text-sm"></i>
+                    <span class="text-xs md:text-sm">Create Post</span>
                 </a>
             </div>
         </div>
 
         <!-- Stats Grid -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
             <!-- Total Posts -->
-            <div class="admin-card p-4 sm:p-6 relative overflow-hidden group">
+            <div class="admin-card p-3 md:p-6 relative overflow-hidden group">
                 <div class="relative z-10">
-                    <div class="flex items-center justify-between mb-2 sm:mb-4">
-                        <div class="w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center text-sm sm:text-xl shadow-sm group-hover:scale-110 transition-transform">
+                    <div class="flex items-center justify-between mb-2 md:mb-4">
+                        <div class="w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center text-xs md:text-xl shadow-sm group-hover:scale-110 transition-transform">
                             <i class="fas fa-newspaper"></i>
                         </div>
                     </div>
-                    <p class="text-[8px] sm:text-[10px] font-black uppercase tracking-widest mb-0.5 sm:mb-1 truncate" style="color: var(--text-secondary);">
+                    <p class="text-[8px] md:text-[10px] font-black uppercase tracking-widest mb-0.5 md:mb-1 truncate" style="color: var(--text-secondary);">
                         Total Articles</p>
-                    <h3 class="text-xl sm:text-3xl font-black" style="color: var(--text-primary);">{{ $posts->total() }}</h3>
+                    <h3 class="text-lg md:text-3xl font-black" style="color: var(--text-primary);">{{ $posts->total() }}</h3>
                 </div>
-                <div class="absolute -right-4 -bottom-4 w-16 h-16 sm:w-24 sm:h-24 bg-blue-500/5 rounded-full group-hover:scale-125 transition-transform"></div>
+                <div class="absolute -right-4 -bottom-4 w-12 h-12 md:w-24 md:h-24 bg-blue-500/5 rounded-full group-hover:scale-125 transition-transform"></div>
             </div>
 
             <!-- Published Posts -->
-            <div class="admin-card p-4 sm:p-6 relative overflow-hidden group border-l-4 border-l-emerald-500">
+            <div class="admin-card p-3 md:p-6 relative overflow-hidden group border-l-2 md:border-l-4 border-l-emerald-500">
                 <div class="relative z-10">
-                    <div class="flex items-center justify-between mb-2 sm:mb-4">
-                        <div class="w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center text-sm sm:text-xl shadow-sm group-hover:scale-110 transition-transform">
+                    <div class="flex items-center justify-between mb-2 md:mb-4">
+                        <div class="w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center text-xs md:text-xl shadow-sm group-hover:scale-110 transition-transform">
                             <i class="fas fa-check-circle"></i>
                         </div>
                     </div>
-                    <p class="text-[8px] sm:text-[10px] font-black uppercase tracking-widest mb-0.5 sm:mb-1 truncate" style="color: var(--text-secondary);">
+                    <p class="text-[8px] md:text-[10px] font-black uppercase tracking-widest mb-0.5 md:mb-1 truncate" style="color: var(--text-secondary);">
                         Published</p>
-                    <h3 class="text-xl sm:text-3xl font-black text-emerald-600">{{ $posts->where('status', 'published')->count() }}</h3>
+                    <h3 class="text-lg md:text-3xl font-black text-emerald-600">{{ $posts->where('status', 'published')->count() }}</h3>
                 </div>
-                <div class="absolute -right-4 -bottom-4 w-16 h-16 sm:w-24 sm:h-24 bg-emerald-500/5 rounded-full group-hover:scale-125 transition-transform"></div>
+                <div class="absolute -right-4 -bottom-4 w-12 h-12 md:w-24 md:h-24 bg-emerald-500/5 rounded-full group-hover:scale-125 transition-transform"></div>
             </div>
 
             <!-- Draft Posts -->
-            <div class="admin-card p-4 sm:p-6 relative overflow-hidden group border-l-4 border-l-amber-500">
+            <div class="admin-card p-3 md:p-6 relative overflow-hidden group border-l-2 md:border-l-4 border-l-amber-500">
                 <div class="relative z-10">
-                    <div class="flex items-center justify-between mb-2 sm:mb-4">
-                        <div class="w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center text-sm sm:text-xl shadow-sm group-hover:scale-110 transition-transform">
+                    <div class="flex items-center justify-between mb-2 md:mb-4">
+                        <div class="w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center text-xs md:text-xl shadow-sm group-hover:scale-110 transition-transform">
                             <i class="fas fa-edit"></i>
                         </div>
                     </div>
-                    <p class="text-[8px] sm:text-[10px] font-black uppercase tracking-widest mb-0.5 sm:mb-1 truncate" style="color: var(--text-secondary);">
+                    <p class="text-[8px] md:text-[10px] font-black uppercase tracking-widest mb-0.5 md:mb-1 truncate" style="color: var(--text-secondary);">
                         Drafts</p>
-                    <h3 class="text-xl sm:text-3xl font-black text-amber-600">{{ $posts->where('status', 'draft')->count() }}</h3>
+                    <h3 class="text-lg md:text-3xl font-black text-amber-600">{{ $posts->where('status', 'draft')->count() }}</h3>
                 </div>
-                <div class="absolute -right-4 -bottom-4 w-16 h-16 sm:w-24 sm:h-24 bg-amber-500/5 rounded-full group-hover:scale-125 transition-transform"></div>
+                <div class="absolute -right-4 -bottom-4 w-12 h-12 md:w-24 md:h-24 bg-amber-500/5 rounded-full group-hover:scale-125 transition-transform"></div>
             </div>
 
             <!-- Total Reads -->
-            <div class="admin-card p-4 sm:p-6 relative overflow-hidden group border-l-4 border-l-purple-500">
+            <div class="admin-card p-3 md:p-6 relative overflow-hidden group border-l-2 md:border-l-4 border-l-purple-500">
                 <div class="relative z-10">
-                    <div class="flex items-center justify-between mb-2 sm:mb-4">
-                        <div class="w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center text-sm sm:text-xl shadow-sm group-hover:scale-110 transition-transform">
+                    <div class="flex items-center justify-between mb-2 md:mb-4">
+                        <div class="w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center text-xs md:text-xl shadow-sm group-hover:scale-110 transition-transform">
                             <i class="fas fa-eye"></i>
                         </div>
                     </div>
-                    <p class="text-[8px] sm:text-[10px] font-black uppercase tracking-widest mb-0.5 sm:mb-1 truncate" style="color: var(--text-secondary);">
+                    <p class="text-[8px] md:text-[10px] font-black uppercase tracking-widest mb-0.5 md:mb-1 truncate" style="color: var(--text-secondary);">
                         Total Reads</p>
-                    <h3 class="text-xl sm:text-3xl font-black text-purple-600">{{ number_format($posts->sum('reads')) }}</h3>
+                    <h3 class="text-lg md:text-3xl font-black text-purple-600">{{ number_format($posts->sum('reads')) }}</h3>
                 </div>
-                <div class="absolute -right-4 -bottom-4 w-16 h-16 sm:w-24 sm:h-24 bg-purple-500/5 rounded-full group-hover:scale-125 transition-transform"></div>
+                <div class="absolute -right-4 -bottom-4 w-12 h-12 md:w-24 md:h-24 bg-purple-500/5 rounded-full group-hover:scale-125 transition-transform"></div>
             </div>
         </div>
 
         <!-- Filters Section -->
-        <div class="glass rounded-2xl p-6 border shadow-sm" style="border-color: var(--border-color);">
-            <form action="{{ route('admin.blogs.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+        <div class="glass rounded-2xl p-4 md:p-6 border shadow-sm" style="border-color: var(--border-color);">
+            <form action="{{ route('admin.blogs.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-3 md:gap-4 items-end">
                 <div>
-                    <label class="block text-xs font-black uppercase tracking-widest mb-2" style="color: var(--text-secondary);">Category</label>
-                    <select name="category" class="w-full px-4 py-2.5 rounded-xl border focus:outline-none focus:ring-4 focus:ring-[#0B4D73]/10 transition-all cursor-pointer" style="background-color: var(--bg-primary); border-color: var(--border-color); color: var(--text-primary);">
+                    <label class="block text-[9px] md:text-xs font-black uppercase tracking-widest mb-1.5 md:mb-2" style="color: var(--text-secondary);">Category</label>
+                    <select name="category" class="w-full px-3 md:px-4 py-2 md:py-2.5 rounded-xl border text-xs md:text-sm focus:outline-none focus:ring-4 focus:ring-[#0B4D73]/10 transition-all cursor-pointer" style="background-color: var(--bg-primary); border-color: var(--border-color); color: var(--text-primary);">
                         <option value="">All Categories</option>
                         @foreach($posts->pluck('category')->unique() as $cat)
                             <option value="{{ $cat }}" {{ request('category') == $cat ? 'selected' : '' }}>{{ $cat }}</option>
@@ -133,7 +133,7 @@
                     </select>
                 </div>
 
-                <div>
+                <div class="hidden md:block">
                     <label class="block text-xs font-black uppercase tracking-widest mb-2" style="color: var(--text-secondary);">Status</label>
                     <select name="status" class="w-full px-4 py-2.5 rounded-xl border focus:outline-none focus:ring-4 focus:ring-[#0B4D73]/10 transition-all cursor-pointer" style="background-color: var(--bg-primary); border-color: var(--border-color); color: var(--text-primary);">
                         <option value="">All Statuses</option>
@@ -143,15 +143,15 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-black uppercase tracking-widest mb-2" style="color: var(--text-secondary);">Search</label>
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Search title..." class="w-full px-4 py-2.5 rounded-xl border focus:outline-none focus:ring-4 focus:ring-[#0B4D73]/10 transition-all" style="background-color: var(--bg-primary); border-color: var(--border-color); color: var(--text-primary);">
+                    <label class="block text-[9px] md:text-xs font-black uppercase tracking-widest mb-1.5 md:mb-2" style="color: var(--text-secondary);">Search</label>
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Search title..." class="w-full px-3 md:px-4 py-2 md:py-2.5 rounded-xl border text-xs md:text-sm focus:outline-none focus:ring-4 focus:ring-[#0B4D73]/10 transition-all" style="background-color: var(--bg-primary); border-color: var(--border-color); color: var(--text-primary);">
                 </div>
 
                 <div class="flex gap-2">
-                    <button type="submit" class="flex-1 bg-[#0B4D73] text-white rounded-xl py-2.5 font-bold hover:brightness-110 transition-all shadow-sm">
+                    <button type="submit" class="flex-1 bg-[#0B4D73] text-white rounded-xl py-2 md:py-2.5 text-xs md:text-sm font-bold hover:brightness-110 transition-all shadow-sm">
                         Filter
                     </button>
-                    <a href="{{ route('admin.blogs.index') }}" class="px-4 py-2.5 border rounded-xl transition-colors flex items-center justify-center" style="border-color: var(--border-color); color: var(--text-secondary);" title="Reset Filters">
+                    <a href="{{ route('admin.blogs.index') }}" class="px-3 md:px-4 py-2 md:py-2.5 border rounded-xl transition-colors flex items-center justify-center text-xs md:text-sm" style="border-color: var(--border-color); color: var(--text-secondary);" title="Reset Filters">
                         <i class="fas fa-undo"></i>
                     </a>
                 </div>
@@ -315,23 +315,23 @@
         </div>
 
         <!-- Mobile List View -->
-        <div class="lg:hidden space-y-3">
+        <div class="lg:hidden space-y-2.5">
             @forelse($posts as $post)
-                <div class="admin-card p-4 flex flex-col gap-3 rounded-2xl glass border border-slate-100/50 relative overflow-hidden group">
+                <div class="admin-card p-3.5 flex flex-col gap-2.5 rounded-2xl glass border border-slate-100/50 relative overflow-hidden group">
                     <div class="flex items-start justify-between">
                         <div class="flex items-center gap-3">
                             <!-- Image Icon -->
-                            <div class="w-10 h-10 shrink-0 rounded-xl overflow-hidden bg-slate-100 border border-slate-200/50">
+                            <div class="w-8 h-8 shrink-0 rounded-lg overflow-hidden bg-slate-100 border border-slate-200/50">
                                 <img src="{{ Str::startsWith($post->featured_image, 'http') ? $post->featured_image : asset('storage/' . $post->featured_image) }}"
                                      class="w-full h-full object-cover"
                                      onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode($post->title) }}&color=0B4D73&background=E0F2FE'">
                             </div>
                             <!-- Info -->
                             <div class="min-w-0">
-                                <h4 class="font-bold text-sm text-slate-900 truncate tracking-tight">
+                                <h4 class="font-bold text-[13px] text-slate-900 truncate tracking-tight leading-tight">
                                     {{ $post->title }}
                                 </h4>
-                                <span class="inline-block mt-0.5 px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[8px] font-black uppercase tracking-widest border border-slate-200">
+                                <span class="inline-block mt-0.5 px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[7px] font-black uppercase tracking-widest border border-slate-200">
                                     {{ $post->category }}
                                 </span>
                             </div>
@@ -339,37 +339,37 @@
                     </div>
                     
                     <!-- Footer/Actions -->
-                    <div class="flex items-center justify-between pt-3 border-t border-slate-100/50">
+                    <div class="flex items-center justify-between pt-2.5 border-t border-slate-100/50">
                         <div class="flex items-center gap-2">
                             <!-- Status -->
                             @if($post->status === 'published')
-                                <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border bg-emerald-50 text-emerald-600 border-emerald-100">Published</span>
+                                <span class="px-1.5 py-0.5 rounded-full text-[7px] font-black uppercase tracking-widest border bg-emerald-50 text-emerald-600 border-emerald-100">Published</span>
                             @else
-                                <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border bg-amber-50 text-amber-600 border-amber-100">Draft</span>
+                                <span class="px-1.5 py-0.5 rounded-full text-[7px] font-black uppercase tracking-widest border bg-amber-50 text-amber-600 border-amber-100">Draft</span>
                             @endif
                             
                             <!-- Reads Count -->
-                            <div class="flex items-center gap-1 text-[10px] font-bold text-slate-500 bg-slate-50 px-2 py-1 rounded-md border border-slate-100">
-                                <i class="fas fa-eye text-[#0B4D73]"></i>
+                            <div class="flex items-center gap-1 text-[8px] font-bold text-slate-500 bg-slate-50 px-1.5 py-0.5 rounded-md border border-slate-100">
+                                <i class="fas fa-eye text-[#0B4D73] text-[7px]"></i>
                                 {{ number_format($post->reads) }}
                             </div>
                         </div>
 
                         <!-- Actions -->
-                        <div class="flex items-center gap-1 shrink-0">
+                        <div class="flex items-center gap-1.5 shrink-0">
                             <a href="{{ route('blog.show', $post->slug) }}" target="_blank"
-                                class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 text-slate-500 hover:bg-slate-100 hover:text-blue-600 transition-colors border border-slate-100">
-                                <i class="fas fa-external-link-alt text-xs"></i>
+                                class="w-7 h-7 flex items-center justify-center rounded-lg bg-slate-50 text-slate-500 hover:text-blue-600 transition-colors border border-slate-100">
+                                <i class="fas fa-external-link-alt text-[10px]"></i>
                             </a>
                             <a href="{{ route('admin.blogs.edit', $post->id) }}"
-                                class="w-8 h-8 flex items-center justify-center rounded-lg bg-blue-50 text-blue-500 border border-blue-100">
-                                <i class="fas fa-edit text-xs"></i>
+                                class="w-7 h-7 flex items-center justify-center rounded-lg bg-blue-50 text-blue-500 border border-blue-100">
+                                <i class="fas fa-edit text-[10px]"></i>
                             </a>
                             <form action="{{ route('admin.blogs.destroy', $post->id) }}" method="POST" onsubmit="return confirm('Delete post?');" class="contents">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="w-8 h-8 flex items-center justify-center rounded-lg bg-red-50 text-red-500 border border-red-100">
-                                    <i class="fas fa-trash-alt text-xs"></i>
+                                <button type="submit" class="w-7 h-7 flex items-center justify-center rounded-lg bg-red-50 text-red-500 border border-red-100">
+                                    <i class="fas fa-trash-alt text-[10px]"></i>
                                 </button>
                             </form>
                         </div>
@@ -380,15 +380,15 @@
                     <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
                         <i class="fas fa-newspaper text-3xl text-slate-300"></i>
                     </div>
-                    <h3 class="text-lg font-black text-slate-900 mb-1">No Articles Found</h3>
-                    <p class="text-xs font-medium text-slate-500">Articles will appear here once created.</p>
+                    <h3 class="text-sm font-black text-slate-900 mb-1">No Articles Found</h3>
+                    <p class="text-[10px] font-medium text-slate-500">Articles will appear here once created.</p>
                 </div>
             @endforelse
         </div>
 
         <!-- Pagination -->
         @if($posts->hasPages())
-            <div class="pt-6 pb-2 border-t mt-6" style="border-color: var(--border-color);">
+            <div class="pt-6 pb-2 border-t mt-4 md:mt-6" style="border-color: var(--border-color);">
                 {{ $posts->links() }}
             </div>
         @endif

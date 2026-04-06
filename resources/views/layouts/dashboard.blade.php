@@ -489,17 +489,79 @@
             opacity: 0;
         }
 
-        /* Hide scrollbar for Chrome, Safari and Opera */
+        /* Desktop/Table Shared Styles */
         .scrollbar-hide::-webkit-scrollbar {
             display: none;
         }
 
-        /* Hide scrollbar for IE, Edge and Firefox */
         .scrollbar-hide {
             -ms-overflow-style: none;
-            /* IE and Edge */
             scrollbar-width: none;
-            /* Firefox */
+        }
+
+        /* --- Global Mobile Refinements (Across App) --- */
+        @media (max-width: 767px) {
+            /* 1. Global Typography Scaling */
+            h1, .text-3xl, .text-4xl, .text-2xl { 
+                font-size: 1.25rem !important; 
+                line-height: 1.75rem !important; 
+                letter-spacing: -0.01em !important;
+            }
+            h2, .text-xl { 
+                font-size: 1.05rem !important; 
+                line-height: 1.5rem !important; 
+            }
+            h3, .text-lg { 
+                font-size: 0.95rem !important; 
+                line-height: 1.4rem !important; 
+            }
+            p, .text-sm, .text-base { 
+                font-size: 0.8125rem !important; 
+                line-height: 1.35 !important; 
+            }
+            .text-xs, label, .uppercase {
+                font-size: 0.6875rem !important;
+                letter-spacing: 0.025em !important;
+            }
+
+            /* 2. Proportional Component Scaling */
+            .p-6, .p-8, .p-10 { padding: 1.125rem !important; }
+            .p-4 { padding: 0.875rem !important; }
+            .px-6, .px-8 { padding-left: 1rem !important; padding-right: 1rem !important; }
+            .py-6, .py-8 { padding-top: 1rem !important; padding-bottom: 1rem !important; }
+            
+            .gap-6, .gap-8, .gap-10 { gap: 1rem !important; }
+            .gap-4 { gap: 0.75rem !important; }
+
+            .space-y-6, .space-y-8, .space-y-10 { margin-top: 1rem !important; }
+            .space-y-6 > :not([hidden]) ~ :not([hidden]) { margin-top: 1rem !important; }
+            .space-y-8 > :not([hidden]) ~ :not([hidden]) { margin-top: 1.25rem !important; }
+
+            /* 3. Button & Input Optimization */
+            .btn { 
+                padding: 0.5rem 0.875rem !important; 
+                font-size: 0.75rem !important; 
+                border-radius: 0.625rem !important;
+            }
+            input, select, textarea {
+                padding: 0.5rem 0.75rem !important;
+                font-size: 0.8125rem !important;
+                border-radius: 0.625rem !important;
+            }
+
+            /* 4. Layout Hierarchy Fixes */
+            .admin-card { 
+                border-radius: 0.875rem !important; 
+                box-shadow: 0 2px 4px rgba(0,0,0,0.04) !important;
+            }
+            .main-content {
+                padding-bottom: 5rem !important; /* Extra space for bottom nav */
+            }
+            
+            /* Hidden elements on ultra-small screens */
+            @media (max-width: 400px) {
+                .hide-on-mobile-xs { display: none !important; }
+            }
         }
     </style>
 
