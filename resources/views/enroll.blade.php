@@ -82,7 +82,7 @@
                     <i class="fas fa-rocket"></i>
                 </div>
 
-                <h3 class="text-2xl font-black text-slate-900 mb-6 relative z-10">Young Adult (7+)</h3>
+                <h3 class="text-2xl font-black text-slate-900 mb-6 relative z-10">Young Adult (18+)</h3>
                 <p class="text-slate-600 text-base leading-relaxed mb-10 font-bold opacity-80 relative z-10">
                     Start your own journey! Join community circles, attend live workshops, and discover your unique purpose
                     through faith-based mentorship.
