@@ -22,6 +22,7 @@
 
         <!-- Scripts -->
         @vite(['resources/js/app.js'])
+        @vite(['resources/js/cache-management.js'])
         @inertiaHead
     </head>
     <body>

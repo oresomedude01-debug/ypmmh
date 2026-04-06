@@ -13,7 +13,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
-            \App\Http\Middleware\NoCacheMiddleware::class,
+            \App\Http\Middleware\CacheControlMiddleware::class,
         ]);
 
         // Register Spatie permission middleware aliases so route middleware

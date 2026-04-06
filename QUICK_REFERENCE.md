@@ -50,6 +50,55 @@ php artisan config:cache
 
 ---
 
+## 🛡️ Stale Data Prevention
+
+The app now has automatic cache invalidation. When data is updated/deleted:
+
+```
+User A updates data
+↓
+CacheManager detects change
+↓
+Related caches are cleared
+↓
+User B reloads page
+↓
+Gets fresh data from server
+```
+
+**No manual cache clearing needed** - it's all automatic!
+
+### Monitor cache (browser console):
+
+```javascript
+// See what's cached
+cacheManager.getCacheStats()
+
+// Emergency clear (if needed)
+cacheManager.clearAllCaches()
+```
+
+---
+
+## Cache Strategies by Content Type
+
+| Type | Strategy | Behavior |
+|------|----------|----------|
+| **HTML Pages** | Network First | Always try server first |
+| **Static Assets** | Cache First | Use cached if available |
+| **CDN Resources** | Stale-While-Revalidate | Serve cache, update background |
+| **API Responses** | Network First | Always fetch fresh |
+| **Error Responses** | Never Cached | Always fail safely |
+
+---
+
+## Related Documentation
+
+- Full details: [`PWA_CACHING_STRATEGY.md`](PWA_CACHING_STRATEGY.md)
+- Deployment guide: [`DEPLOYMENT_GUIDE.md`](DEPLOYMENT_GUIDE.md)
+
+---
+
 ## Version Numbering (Semantic)
 
 - **1.0.0** = Major.Minor.Patch

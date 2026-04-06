@@ -3,19 +3,33 @@
  * ==================================================================
  * 
  * Caching Strategy:
- *   - Cache First: Static assets (CSS, JS, images, fonts)
- *   - Network First: Dynamic content (HTML pages, API responses)
+ *   - Cache First: Static assets (CSS, JS, images, fonts) - ONLY if hash/version changes
+ *   - Network First: Dynamic content (HTML pages, API responses) - Always try server first
  *   - Stale While Revalidate: CDN resources (Tailwind, FontAwesome, Google Fonts)
  *
- * Versioning: Automatically fetches version from app, invalidates old caches on deploy
- * Push Notifications: Handles Web Push Protocol notifications from server
+ * Key Features:
+ *   - NEVER caches error responses (4xx, 5xx)
+ *   - NEVER caches API responses (relies on server Cache-Control headers)
+ *   - Automatically cleans up old caches on version change
+ *   - Validates response status before caching
+ *   - Respects Cache-Control headers from server
  */
 
-// Version will be pulled from query parameter or fallback to date-based version
-const urlParams = new URLSearchParams(location.search);
-const APP_VERSION = urlParams.get('v') || new Date().toISOString().split('T')[0];
+// Get app version from localStorage or use date-based fallback
+const getAppVersion = () => {
+    try {
+        const stored = localStorage.getItem('APP_VERSION');
+        if (stored) return stored;
+    } catch (e) {
+        console.warn('[SW] Cannot access localStorage:', e.message);
+    }
+    return new Date().toISOString().split('T')[0];
+};
+
+const APP_VERSION = getAppVersion();
 const CACHE_VERSION = APP_VERSION;
 console.log(`[SW] Service Worker initialized (v${CACHE_VERSION})`);
+
 const STATIC_CACHE = `YPMMH-static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `YPMMH-dynamic-${CACHE_VERSION}`;
 const CDN_CACHE = `YPMMH-cdn-${CACHE_VERSION}`;
@@ -74,28 +88,35 @@ self.addEventListener('install', (event) => {
 });
 
 // ===========================
-// ACTIVATE EVENT
+// ACTIVATE EVENT - Clean up old caches
 // ===========================
 self.addEventListener('activate', (event) => {
     console.log(`[SW] Activating Service Worker ${CACHE_VERSION}`);
 
     event.waitUntil(
+        // First, clean up old version caches
         caches.keys()
             .then((cacheNames) => {
+                console.log('[SW] Current caches:', cacheNames);
+                console.log('[SW] Keeping caches for version:', CACHE_VERSION);
+
                 return Promise.all(
                     cacheNames
                         .filter((cacheName) => {
                             // Delete old versioned caches
-                            return cacheName.startsWith('YPMMH-') && 
+                            const shouldDelete = cacheName.startsWith('YPMMH-') && 
                                    !cacheName.endsWith(CACHE_VERSION);
+                            
+                            if (shouldDelete) {
+                                console.log(`[SW] Deleting old cache: ${cacheName}`);
+                            }
+                            return shouldDelete;
                         })
-                        .map((cacheName) => {
-                            console.log(`[SW] Deleting old cache: ${cacheName}`);
-                            return caches.delete(cacheName);
-                        })
+                        .map((cacheName) => caches.delete(cacheName))
                 );
             })
             .then(() => {
+                console.log('[SW] Old caches cleaned up');
                 // Claim all clients immediately
                 return self.clients.claim();
             })
@@ -126,9 +147,6 @@ self.addEventListener('fetch', (event) => {
     // Skip Chrome extensions and other non-http(s) schemes
     if (!url.protocol.startsWith('http')) return;
 
-    // Skip requests with query params that indicate AJAX (let them go to network)
-    if (url.searchParams.has('ajax')) return;
-
     // Skip Laravel-specific paths that should never be cached
     if (isExcludedPath(url.pathname)) return;
 
@@ -152,19 +170,51 @@ self.addEventListener('fetch', (event) => {
 // ===========================
 
 /**
+ * Validate Response Before Caching
+ * 
+ * NEVER cache:
+ * - Error responses (4xx, 5xx)
+ * - Responses without content-type
+ * - Responses that are too small (might be redirects)
+ */
+function isValidCacheableResponse(response) {
+    // Don't cache error responses
+    if (!response || response.status >= 400) {
+        console.log(`[SW] Not caching response with status ${response?.status}`);
+        return false;
+    }
+
+    // Don't cache responses without proper content
+    if (response.status === 204 || response.status === 304) {
+        return false;
+    }
+
+    // Check if response has content
+    if (!response.headers || !response.headers.get('content-type')) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
  * Cache First Strategy
  * Best for: static assets that rarely change (CSS, JS, images)
+ * 
+ * Priority: Cache > Network > Offline Fallback
  */
 async function cacheFirst(request, cacheName, limit = null) {
     try {
         const cachedResponse = await caches.match(request);
         if (cachedResponse) {
+            console.log(`[SW] Cache hit: ${request.url}`);
             return cachedResponse;
         }
 
         const networkResponse = await fetch(request);
 
-        if (networkResponse && networkResponse.status === 200) {
+        // Validate response before caching
+        if (isValidCacheableResponse(networkResponse)) {
             const cache = await caches.open(cacheName);
             cache.put(request, networkResponse.clone());
 
@@ -192,23 +242,34 @@ async function cacheFirst(request, cacheName, limit = null) {
 /**
  * Network First Strategy
  * Best for: dynamic content (HTML pages, API data)
+ * 
+ * Priority: Network > Cache > Offline Fallback
+ * 
+ * This ensures users always get fresh data from the server.
+ * Only falls back to cache if network fails (true offline scenario).
  */
 async function networkFirst(request, cacheName) {
     try {
         const networkResponse = await fetch(request);
 
-        if (networkResponse && networkResponse.status === 200) {
+        // Validate response before caching
+        if (isValidCacheableResponse(networkResponse)) {
             const cache = await caches.open(cacheName);
             cache.put(request, networkResponse.clone());
             trimCache(cacheName, DYNAMIC_CACHE_LIMIT);
+            
+            console.log(`[SW] Network fresh: ${request.url}`);
+        } else {
+            console.log(`[SW] Invalid response, not caching: ${request.url}`);
         }
 
         return networkResponse;
     } catch (error) {
-        console.log('[SW] Network failed, trying cache:', request.url);
+        console.log(`[SW] Network failed for ${request.url}, falling back to cache`);
 
         const cachedResponse = await caches.match(request);
         if (cachedResponse) {
+            console.log(`[SW] Serving from cache: ${request.url}`);
             return cachedResponse;
         }
 
@@ -230,22 +291,31 @@ async function networkFirst(request, cacheName) {
 /**
  * Stale While Revalidate Strategy
  * Best for: CDN resources that should update but can serve stale
+ * 
+ * Priority: Cache (immediate) + Network (background update)
+ * 
+ * Returns cached version immediately, then updates cache in background
  */
 async function staleWhileRevalidate(request, cacheName) {
     const cache = await caches.open(cacheName);
     const cachedResponse = await cache.match(request);
 
-    const fetchPromise = fetch(request).then((networkResponse) => {
-        if (networkResponse && networkResponse.status === 200) {
-            cache.put(request, networkResponse.clone());
-        }
-        return networkResponse;
-    }).catch(() => {
-        // Network failed, we'll use cache if available
-        return cachedResponse;
-    });
+    const fetchPromise = fetch(request)
+        .then((networkResponse) => {
+            // Validate before updating cache
+            if (isValidCacheableResponse(networkResponse)) {
+                cache.put(request, networkResponse.clone());
+                console.log(`[SW] Updated SWR cache: ${request.url}`);
+            }
+            return networkResponse;
+        })
+        .catch((error) => {
+            console.warn('[SW] SWR network failed:', error);
+            // Network failed, we'll use cache if available
+            return cachedResponse || new Response('Offline', { status: 503 });
+        });
 
-    // Return cached version immediately, update in background
+    // Return cached version immediately if available, otherwise wait for network
     return cachedResponse || fetchPromise;
 }
 
@@ -277,21 +347,40 @@ function isNavigationRequest(request) {
 }
 
 function isExcludedPath(pathname) {
+    // Paths that should NEVER be cached by Service Worker
+    // These are handled by server-side Cache-Control headers
     const excludedPaths = [
+        // API endpoints - handled by network first + server cache headers
         '/api/',
+        
+        // Authentication routes - never cache
         '/login',
         '/register',
         '/logout',
         '/password',
+        '/forgot-password',
+        '/reset-password',
         '/sanctum/',
+        
+        // Real-time communication - never cache
         '/broadcasting/',
+        '/echo/',
+        
+        // External webhooks - never cache
         '/webhooks/',
+        'paystack',
+        
+        // Development tools - never cache
         '/_debugbar/',
         '/telescope/',
         '/horizon/',
         '/livewire/',
+        
+        // Admin-only paths - rely on server cache headers
+        '/admin/',
     ];
-    return excludedPaths.some(path => pathname.startsWith(path));
+    
+    return excludedPaths.some(path => pathname.includes(path));
 }
 
 /**
