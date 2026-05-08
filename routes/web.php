@@ -163,15 +163,27 @@ Route::middleware(['auth', 'ensure_active'])->group(function () {
     Route::middleware(['role:Admin'])->prefix('admin')->name('admin.')->group(function () {
         // Debug Mail Config
         Route::get('debug/mail-config', function () {
+            $mailMailer = env('MAIL_MAILER') ?: config('mail.default');
+            $mailFrom = config('mail.from.address') ?: env('MAIL_FROM_ADDRESS');
+            $isConfigCached = \Illuminate\Support\Facades\File::exists(base_path('bootstrap/cache/config.php'));
+            
             return response()->json([
-                'MAIL_MAILER' => env('MAIL_MAILER') ?: 'NOT SET',
+                'env_MAIL_MAILER' => env('MAIL_MAILER') ?: 'NOT SET IN .env',
+                'config_mail_default' => config('mail.default'),
+                'resolved_mailer' => $mailMailer,
                 'MAIL_HOST' => env('MAIL_HOST') ?: 'NOT SET',
                 'MAIL_PORT' => env('MAIL_PORT') ?: 'NOT SET',
                 'MAIL_USERNAME' => env('MAIL_USERNAME') ? substr(env('MAIL_USERNAME'), 0, 5) . '***' : 'NOT SET',
-                'MAIL_FROM_ADDRESS' => env('MAIL_FROM_ADDRESS') ?: 'NOT SET',
-                'MAIL_FROM_NAME' => env('MAIL_FROM_NAME') ?: 'NOT SET',
-                'config_default' => config('mail.default'),
-                'message' => env('MAIL_MAILER') === 'log' ? '⚠️ WARNING: Mail driver is set to LOG! Emails will not be sent, only logged.' : '✓ Mail configuration appears to be using ' . (env('MAIL_MAILER') ?: config('mail.default')),
+                'MAIL_FROM_ADDRESS' => $mailFrom ?: 'NOT SET',
+                'MAIL_FROM_NAME' => config('mail.from.name') ?: env('MAIL_FROM_NAME') ?: 'NOT SET',
+                'QUEUE_CONNECTION' => config('queue.default'),
+                'config_cached' => $isConfigCached,
+                'status' => $mailMailer === 'log' ? '❌ PROBLEM: Mail driver is LOG!' : ($mailMailer === 'smtp' ? '✓ Using SMTP' : '⚠️ Driver: ' . $mailMailer),
+                'instructions' => [
+                    'if_config_cached' => 'Run: php artisan config:clear && php artisan config:cache',
+                    'test_mail' => 'Visit /admin/mail to send a test email',
+                    'check_logs' => 'Check storage/logs/laravel.log for errors',
+                ],
             ]);
         })->name('debug.mail');
         

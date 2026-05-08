@@ -2,8 +2,6 @@
 
 namespace App\Mail;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -11,7 +9,7 @@ use Illuminate\Queue\SerializesModels;
 
 class AdminDirectMail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use SerializesModels;
 
     /**
      * Create a new message instance.
@@ -31,10 +29,12 @@ class AdminDirectMail extends Mailable
      */
     public function envelope(): Envelope
     {
+        $fromAddress = config('mail.from.address') ?: env('MAIL_FROM_ADDRESS');
+        
         return new Envelope(
             subject: $this->subject,
-            from: config('mail.from.address'),
-            replyTo: [config('mail.from.address')],
+            from: $fromAddress,
+            replyTo: [$fromAddress],
         );
     }
 
