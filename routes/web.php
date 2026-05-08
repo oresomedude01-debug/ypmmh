@@ -161,6 +161,20 @@ Route::middleware(['auth', 'ensure_active'])->group(function () {
 
     // Admin
     Route::middleware(['role:Admin'])->prefix('admin')->name('admin.')->group(function () {
+        // Debug Mail Config
+        Route::get('debug/mail-config', function () {
+            return response()->json([
+                'MAIL_MAILER' => env('MAIL_MAILER') ?: 'NOT SET',
+                'MAIL_HOST' => env('MAIL_HOST') ?: 'NOT SET',
+                'MAIL_PORT' => env('MAIL_PORT') ?: 'NOT SET',
+                'MAIL_USERNAME' => env('MAIL_USERNAME') ? substr(env('MAIL_USERNAME'), 0, 5) . '***' : 'NOT SET',
+                'MAIL_FROM_ADDRESS' => env('MAIL_FROM_ADDRESS') ?: 'NOT SET',
+                'MAIL_FROM_NAME' => env('MAIL_FROM_NAME') ?: 'NOT SET',
+                'config_default' => config('mail.default'),
+                'message' => env('MAIL_MAILER') === 'log' ? '⚠️ WARNING: Mail driver is set to LOG! Emails will not be sent, only logged.' : '✓ Mail configuration appears to be using ' . (env('MAIL_MAILER') ?: config('mail.default')),
+            ]);
+        })->name('debug.mail');
+        
         Route::get('dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
         
         // Cache Management
