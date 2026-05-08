@@ -71,6 +71,11 @@ class AdminMailController extends Controller
                 return back()->with('error', 'Selected recipient is not a parent.');
             }
 
+            // Verify email is set
+            if (!$recipient->email) {
+                return back()->with('error', 'Selected recipient does not have a valid email address.');
+            }
+
             // Send email
             Mail::to($recipient->email)->send(
                 new AdminDirectMail(
@@ -83,9 +88,22 @@ class AdminMailController extends Controller
             );
 
             return back()->with('success', 'Email sent successfully to ' . $recipient->first_name . ' (' . $recipient->email . ')');
-        } catch (\Exception $e) {
-            \Log::error('Admin Mail Error: ' . $e->getMessage());
-            return back()->with('error', 'Failed to send email. Please try again.');
+        } catch (\Throwable $e) {
+            $errorMsg = $e->getMessage();
+            \Log::error('Admin Mail Error: ' . $errorMsg, [
+                'recipient_type' => $validated['recipient_type'] ?? null,
+                'recipient_id' => $validated['recipient_id'] ?? null,
+                'exception' => class_basename($e),
+                'line' => $e->getLine(),
+                'file' => $e->getFile(),
+            ]);
+            
+            // Return more specific error for debugging
+            $displayError = config('app.debug') 
+                ? 'Failed to send email: ' . $errorMsg
+                : 'Failed to send email. Please try again.';
+            
+            return back()->with('error', $displayError);
         }
     }
 
