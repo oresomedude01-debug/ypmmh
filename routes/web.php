@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\ProgramController as AdminProgramController;
 use App\Http\Controllers\Admin\ProgramContentController as AdminProgramContentController;
 use App\Http\Controllers\Admin\CohortController as AdminCohortController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\AdminMailController;
 use App\Http\Controllers\Mentor\MentorDashboardController;
 use App\Http\Controllers\Mentor\MentorProgramController;
 use App\Http\Controllers\Mentor\LessonController as MentorLessonController;
@@ -215,6 +216,11 @@ Route::middleware(['auth', 'ensure_active'])->group(function () {
         Route::post('programs/{program}/chat/messages', [\App\Http\Controllers\ProgramChatController::class, 'sendMessage'])->middleware(\App\Http\Middleware\EnsureNotChatSuspended::class)->name('programs.chat.send');
         Route::delete('chat/messages/{message}', [\App\Http\Controllers\ProgramChatController::class, 'deleteMessage'])->name('chat.messages.destroy');
         Route::post('programs/{program}/chat/members/{user}/toggle-suspension', [\App\Http\Controllers\ProgramChatController::class, 'toggleSuspension'])->name('programs.chat.members.toggle-suspension');
+
+        // Direct Mail to Students & Parents
+        Route::get('mail', [AdminMailController::class, 'index'])->name('mail.index');
+        Route::post('mail/send', [AdminMailController::class, 'send'])->name('mail.send');
+        Route::get('mail/get-recipients', [AdminMailController::class, 'getRecipients'])->name('mail.get-recipients');
 
         // Settings
         Route::get('settings', [\App\Http\Controllers\Admin\SettingsController::class, 'index'])->name('settings.index');

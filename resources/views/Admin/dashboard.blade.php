@@ -86,6 +86,10 @@
                     <i class="fas fa-download"></i>
                     <span>Export Report</span>
                 </button>
+                <a href="{{ route('admin.mail.index') }}" class="btn btn-secondary glass">
+                    <i class="fas fa-envelope"></i>
+                    <span>Send Mail</span>
+                </a>
                 <a href="{{ route('admin.users.create') }}" class="btn btn-primary shadow-lg shadow-[#0B4D73]/20">
                     <i class="fas fa-plus"></i>
                     <span>Add New User</span>

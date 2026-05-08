@@ -238,6 +238,12 @@
                     <i class="fas fa-layer-group w-5"></i>
                     <span class="font-medium">Report & Feedbacks</span>
                 </a>
+
+                <a href="{{route('admin.mail.index')}}"
+                    class="menu-item {{ request()->routeIs('admin.mail.*') ? 'active' : 'glass-hover' }} flex items-center gap-3 px-4 py-3 rounded-lg mb-2">
+                    <i class="fas fa-envelope w-5"></i>
+                    <span class="font-medium">Send Direct Mail</span>
+                </a>
             </div>
 
             <!-- Finance Section -->
