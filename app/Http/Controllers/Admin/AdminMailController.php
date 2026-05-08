@@ -82,7 +82,7 @@ class AdminMailController extends Controller
                     recipientName: $recipient->first_name,
                     recipientType: $validated['recipient_type'],
                     subject: $validated['subject'],
-                    message: $validated['message'],
+                    body: $validated['message'],
                     senderName: auth()->user()->first_name . ' ' . auth()->user()->last_name,
                 )
             );

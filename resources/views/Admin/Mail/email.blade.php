@@ -109,7 +109,7 @@
             </p>
 
             <!-- Message -->
-            <div class="message">{{ $message }}</div>
+            <div class="message">{{ $body }}</div>
 
             <!-- Sender Info -->
             <div class="sender">

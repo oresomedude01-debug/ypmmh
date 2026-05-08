@@ -20,7 +20,7 @@ class AdminDirectMail extends Mailable
         public string $recipientName,
         public string $recipientType,
         string $subject,
-        public string $message,
+        public string $body,
         public ?string $senderName = null,
     ) {
         $this->subject = $subject;
@@ -48,7 +48,7 @@ class AdminDirectMail extends Mailable
             with: [
                 'recipientName' => $this->recipientName,
                 'recipientType' => $this->recipientType,
-                'message' => $this->message,
+                'body' => $this->body,
                 'senderName' => $this->senderName,
             ],
         );
