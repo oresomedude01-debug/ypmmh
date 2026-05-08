@@ -19,10 +19,11 @@ class AdminDirectMail extends Mailable
     public function __construct(
         public string $recipientName,
         public string $recipientType,
-        private string $subject,
+        string $subject,
         public string $message,
         public ?string $senderName = null,
     ) {
+        $this->subject = $subject;
     }
 
     /**
