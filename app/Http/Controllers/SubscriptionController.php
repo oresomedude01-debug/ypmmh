@@ -173,6 +173,25 @@ class SubscriptionController extends Controller
         $payer = User::find($payerId);
         $child = User::find($childId);
 
+        // If the program is free, enroll directly and bypass payment gateway
+        if ($program->is_free || $program->price <= 0) {
+            Enrollment::create([
+                'user_id' => $childId,
+                'program_id' => $program->id,
+                'status' => 'active',
+                'is_active' => true,
+            ]);
+
+            session()->forget(['subscription_intent', 'active_payment_id']);
+
+            $successMsg = ($payerId === $childId)
+                ? 'You have successfully enrolled in ' . $program->name . '!'
+                : $child->first_name . ' has been successfully enrolled in ' . $program->name . '!';
+
+            return redirect()->route($payer->hasRole('Parent') ? 'parent.programs.catalog' : 'child.dashboard')
+                ->with('success', $successMsg);
+        }
+
         // Create pending payment record
         $payment = Payment::create([
             'transaction_id' => 'TXN-' . strtoupper(Str::random(12)),

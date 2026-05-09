@@ -56,14 +56,26 @@
                             
                             <div class="flex flex-wrap items-center gap-4 md:gap-6 pt-2">
                                 @if(auth()->user()->hasRole('Child'))
-                                    <form action="{{ route('subscription.initiate') }}" method="POST">
-                                        @csrf
-                                        <input type="hidden" name="program_id" value="{{ $featured->id }}">
-                                        <button type="submit" 
-                                                class="px-8 py-4 bg-white text-slate-900 rounded-2xl font-black text-sm md:text-base hover:bg-blue-50 transition-all shadow-xl active:scale-95 flex items-center gap-2">
-                                            Start Your Journey <i class="fas fa-arrow-right"></i>
-                                        </button>
-                                    </form>
+                                    <div class="flex gap-2">
+                                        @if(auth()->user()->age >= 18)
+                                        <form action="{{ route('subscription.initiate') }}" method="POST">
+                                            @csrf
+                                            <input type="hidden" name="program_id" value="{{ $featured->id }}">
+                                            <button type="submit" 
+                                                    class="px-8 py-4 bg-white text-slate-900 rounded-2xl font-black text-sm md:text-base hover:bg-blue-50 transition-all shadow-xl active:scale-95 flex items-center gap-2">
+                                                Start Your Journey <i class="fas fa-arrow-right"></i>
+                                            </button>
+                                        </form>
+                                        @endif
+                                        <form action="{{ route('child.request') }}" method="POST">
+                                            @csrf
+                                            <input type="hidden" name="program_id" value="{{ $featured->id }}">
+                                            <button type="submit" 
+                                                    class="px-8 py-4 bg-white/10 backdrop-blur-md text-white border border-white/30 rounded-2xl font-black text-sm md:text-base hover:bg-white/20 transition-all active:scale-95 flex items-center gap-2">
+                                                Ask Parent <i class="fas fa-arrow-right"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 @else
                                     <button onclick="openEnrollModal({{ $featured->id }}, '{{ addslashes($featured->name) }}', {{ json_encode($featured->eligible_child_ids ?? []) }})" 
                                             class="px-8 py-4 bg-white text-slate-900 rounded-2xl font-black text-sm md:text-base hover:bg-blue-50 transition-all shadow-xl active:scale-95 flex items-center gap-2">
@@ -212,6 +224,7 @@
                             <div class="flex items-center gap-2">
                                 @if(auth()->user()->hasRole('Child'))
                                     <div class="flex-1 flex gap-2">
+                                        @if(auth()->user()->age >= 18)
                                         <form action="{{ route('subscription.initiate') }}" method="POST" class="flex-1">
                                             @csrf
                                             <input type="hidden" name="program_id" value="{{ $program->id }}">
@@ -220,6 +233,7 @@
                                                 Enroll Me
                                             </button>
                                         </form>
+                                        @endif
                                         <form action="{{ route('child.request') }}" method="POST" class="flex-1">
                                             @csrf
                                             <input type="hidden" name="program_id" value="{{ $program->id }}">
