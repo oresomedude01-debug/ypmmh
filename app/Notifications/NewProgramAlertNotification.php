@@ -8,7 +8,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use App\Models\Program;
 
-class NewProgramAlertNotification extends Notification
+class NewProgramAlertNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 

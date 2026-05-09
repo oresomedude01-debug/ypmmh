@@ -76,8 +76,8 @@ class AdminMailController extends Controller
                 return back()->with('error', 'Selected recipient does not have a valid email address.');
             }
 
-            // Send email
-            Mail::to($recipient->email)->send(
+            // Queue email for background delivery
+            Mail::to($recipient->email)->queue(
                 new AdminDirectMail(
                     recipientName: $recipient->first_name,
                     recipientType: $validated['recipient_type'],
@@ -87,7 +87,7 @@ class AdminMailController extends Controller
                 )
             );
 
-            return back()->with('success', 'Email sent successfully to ' . $recipient->first_name . ' (' . $recipient->email . ')');
+            return back()->with('success', 'Email queued successfully for ' . $recipient->first_name . ' (' . $recipient->email . '). It will be delivered shortly.');
         } catch (\Throwable $e) {
             $errorMsg = $e->getMessage();
             \Log::error('Admin Mail Error: ' . $errorMsg, [

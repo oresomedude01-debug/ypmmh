@@ -8,7 +8,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use App\Models\User;
 
-class NewUserJoinedNotification extends Notification
+class NewUserJoinedNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 

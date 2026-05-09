@@ -8,7 +8,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use App\Models\Post;
 
-class NewBlogPublishedParentNotification extends Notification
+class NewBlogPublishedParentNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
