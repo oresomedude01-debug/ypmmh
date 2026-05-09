@@ -53,6 +53,7 @@ class ParentDashboardController extends Controller
             'password' => Hash::make('password123'),
             'parent_id' => Auth::id(),
             'relationship' => $request->relationship,
+            'must_change_password' => true,
         ];
 
         if ($request->hasFile('profile_picture')) {
@@ -66,6 +67,9 @@ class ParentDashboardController extends Controller
         // Unique ID
         $child->unique_number = 'CH' . date('Y') . str_pad($child->id, 4, '0', STR_PAD_LEFT);
         $child->save();
+
+        // Send Welcome & Credential Email
+        \Illuminate\Support\Facades\Mail::to($child->email)->queue(new \App\Mail\ChildWelcomeMail($child, Auth::user()));
 
         return redirect()->route('parent.dashboard')->with('success', $child->first_name . ' has been added to your family.');
     }

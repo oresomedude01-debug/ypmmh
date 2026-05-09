@@ -23,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
             'ensure_active' => \App\Http\Middleware\EnsureActiveAccount::class,
+            'force_password_change' => \App\Http\Middleware\ForcePasswordChange::class,
         ]);
 
         // Exclude Paystack webhook from CSRF verification

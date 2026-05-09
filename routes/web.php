@@ -120,7 +120,12 @@ Route::get('/dashboard', function () {
     abort(403);
 })->middleware(['auth', 'ensure_active'])->name('dashboard');
 
-Route::middleware(['auth', 'ensure_active'])->group(function () {
+Route::middleware(['auth'])->group(function () {
+    Route::get('/password/change', [\App\Http\Controllers\Auth\PasswordChangeController::class, 'showChangeForm'])->name('password.change.notice');
+    Route::post('/password/change', [\App\Http\Controllers\Auth\PasswordChangeController::class, 'updatePassword'])->name('password.change.update');
+});
+
+Route::middleware(['auth', 'ensure_active', 'force_password_change'])->group(function () {
 
     // Shared Catalog Route
     Route::get('programs-catalog', [ParentDashboardController::class, 'programs'])->name('parent.programs.catalog');
@@ -416,7 +421,7 @@ Route::post('subscription/initiate', [\App\Http\Controllers\SubscriptionControll
 // Paystack Webhook (excluded from CSRF - see VerifyCsrfToken middleware)
 Route::post('webhooks/paystack', [\App\Http\Controllers\SubscriptionController::class, 'handleWebhook'])->name('webhooks.paystack');
 
-Route::middleware(['auth', 'ensure_active'])->group(function () {
+Route::middleware(['auth', 'ensure_active', 'force_password_change'])->group(function () {
     Route::get('subscription/resume', [\App\Http\Controllers\SubscriptionController::class, 'resumeAfterLogin'])->name('subscription.resume');
     Route::post('subscription/select-child', [\App\Http\Controllers\SubscriptionController::class, 'selectChild'])->name('subscription.select-child');
     Route::post('subscription/verify-payment', [\App\Http\Controllers\SubscriptionController::class, 'verifyPayment'])->name('subscription.verify-payment');
