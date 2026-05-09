@@ -1,110 +1,104 @@
 @extends('layouts.dashboard')
 
-@section('title', 'My Alerts')
-
-@section('styles')
-    <style>
-        .notification-item {
-            transition: all 0.2s ease;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .notification-item:active {
-            background-color: #f8fafc;
-        }
-
-        .hero-gradient {
-            background: linear-gradient(135deg, #0B4D73 0%, #1e40af 50%, #1e3a8a 100%);
-        }
-    </style>
-@endsection
+@section('title', 'My Notifications')
 
 @section('content')
-    <div class="max-w-4xl mx-auto space-y-6 animate-fade-in pb-20 md:pb-10">
-
-        <!-- Native Header -->
-        <div class="hero-gradient rounded-[2.5rem] p-6 md:p-8 text-white shadow-2xl relative overflow-hidden">
-            <div class="absolute -top-12 -right-12 w-48 h-48 bg-white/10 rounded-full blur-3xl"></div>
-
-            <div class="relative z-10 flex items-center justify-between">
-                <div>
-                    <h1 class="text-2xl font-black tracking-tight mb-0.5">Alerts</h1>
-                    <p class="text-blue-200/70 text-[10px] font-black uppercase tracking-[0.2em]">Updates & News</p>
-                </div>
-                <div
-                    class="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-xl shadow-inner border border-white/20">
-                    <i class="fas fa-bell"></i>
-                </div>
+    <div class="max-w-3xl mx-auto space-y-6 animate-fade-in pb-10">
+        <!-- Header -->
+        <div class="flex items-center justify-between px-1">
+            <div>
+                <h1 class="text-2xl font-black text-slate-900 flex items-center gap-3">
+                    <span class="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#0B4D73] to-blue-400 flex items-center justify-center">
+                        <i class="fas fa-bell text-white text-base"></i>
+                    </span>
+                    My Alerts
+                </h1>
+                <p class="text-xs text-slate-400 mt-1 ml-13">Tap a notification to go to the relevant page.</p>
             </div>
+            <form method="POST" action="{{ route('child.notifications.read-all') }}">
+                @csrf
+                <button type="submit"
+                    class="text-[10px] font-black uppercase text-[#0B4D73] tracking-widest hover:underline flex items-center gap-1">
+                    <i class="fas fa-check-double text-[9px]"></i> Mark all read
+                </button>
+            </form>
         </div>
 
         <!-- Notifications List -->
-        <div class="bg-white rounded-[2.5rem] border border-slate-100/80 shadow-sm overflow-hidden">
+        <div class="space-y-2">
             @forelse($notifications as $notification)
-                <div class="notification-item flex items-start gap-4 p-5 border-b border-slate-50 last:border-0 relative group">
-                    <!-- Icon Bubble -->
-                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-sm text-white
-                                            {{ $notification->data['type'] === 'enrollment' ? 'bg-indigo-500' : '' }}
-                                            {{ $notification->data['type'] === 'new_content' ? 'bg-emerald-500' : '' }}
-                                            {{ $notification->data['type'] === 'chat' ? 'bg-[#0B4D73]' : '' }}
-                                            {{ $notification->data['type'] === 'achievement' ? 'bg-yellow-500' : '' }}
-                                            {{ !in_array($notification->data['type'], ['enrollment', 'new_content', 'chat', 'achievement']) ? 'bg-slate-400' : '' }}
-                                        ">
-                        <i class="fas 
-                                                {{ $notification->data['type'] === 'enrollment' ? 'fa-map-signs' : '' }}
-                                                {{ $notification->data['type'] === 'new_content' ? 'fa-book-reader' : '' }}
-                                                {{ $notification->data['type'] === 'chat' ? 'fa-comments' : '' }}
-                                                {{ $notification->data['type'] === 'achievement' ? 'fa-award' : '' }}
-                                                {{ !in_array($notification->data['type'], ['enrollment', 'new_content', 'chat', 'achievement']) ? 'fa-bell' : '' }}
-                                            text-lg"></i>
+                @php
+                    $isUnread = !$notification->read_at;
+                    $type = $notification->data['type'] ?? 'system';
+                    $redirectUrl = route('child.notifications.redirect', $notification->id);
+
+                    $iconMap = [
+                        'new_program_available'  => ['fa-graduation-cap', 'from-emerald-400 to-emerald-600'],
+                        'program_update'         => ['fa-sync-alt',       'from-sky-400 to-sky-600'],
+                        'lesson_completion'      => ['fa-check-circle',   'from-green-400 to-green-600'],
+                        'blog_published'         => ['fa-newspaper',      'from-purple-400 to-purple-600'],
+                        'blog_post'              => ['fa-newspaper',      'from-indigo-400 to-indigo-600'],
+                        'birthday'               => ['fa-birthday-cake',  'from-pink-400 to-pink-600'],
+                    ];
+                    [$iconClass, $gradient] = $iconMap[$type] ?? ['fa-bell', 'from-[#0B4D73] to-blue-500'];
+
+                    $labelMap = [
+                        'new_program_available'  => 'New Course',
+                        'program_update'         => 'Program Update',
+                        'lesson_completion'      => 'Achievement',
+                        'blog_published'         => 'New Article',
+                        'blog_post'              => 'Blog Alert',
+                        'birthday'               => 'Birthday',
+                    ];
+                    $label = $labelMap[$type] ?? 'System';
+                @endphp
+
+                <a href="{{ $redirectUrl }}"
+                   class="group flex items-start gap-4 p-4 rounded-2xl border transition-all duration-200 cursor-pointer
+                          {{ $isUnread
+                              ? 'bg-blue-50/70 border-blue-200 shadow-sm'
+                              : 'bg-white border-slate-100 shadow-sm hover:shadow-md hover:border-slate-200' }}">
+
+                    <!-- Icon -->
+                    <div class="w-11 h-11 rounded-xl bg-gradient-to-br {{ $gradient }} flex items-center justify-center shrink-0 shadow-sm group-hover:scale-110 transition-transform">
+                        <i class="fas {{ $iconClass }} text-white text-sm"></i>
                     </div>
 
-                    <div class="flex-1 min-w-0 pr-8">
-                        <div class="flex items-center gap-2 mb-1">
-                            <span class="text-[8px] font-black uppercase tracking-widest text-[#0B4D73]/40">
-                                {{ str_replace('_', ' ', $notification->data['type']) }}
-                            </span>
-                            <span class="text-[8px] font-bold text-slate-300">
-                                {{ $notification->created_at->diffForHumans() }}
-                            </span>
+                    <!-- Text -->
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between gap-1 mb-0.5">
+                            <span class="text-[9px] font-black uppercase tracking-widest text-slate-400">{{ $label }}</span>
+                            <span class="text-[10px] text-slate-400 shrink-0">{{ $notification->created_at->diffForHumans() }}</span>
                         </div>
-                        <p class="text-sm font-bold text-slate-800 leading-snug">{{ $notification->data['message'] }}</p>
-
-                        @if(isset($notification->data['program_id']))
-                            <div class="mt-2 text-right">
-                                <a href="{{ route('child.programs.show', $notification->data['program_id']) }}"
-                                    class="inline-flex items-center gap-2 text-[9px] font-black text-[#0B4D73] uppercase tracking-widest bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100">
-                                    <span>Enter Program</span>
-                                    <i class="fas fa-arrow-right"></i>
-                                </a>
-                            </div>
-                        @endif
+                        <p class="text-sm font-bold text-slate-800 leading-snug group-hover:text-[#0B4D73] transition-colors">
+                            {{ $notification->data['message'] ?? 'New alert.' }}
+                        </p>
+                        <span class="mt-1 text-[10px] font-black uppercase tracking-wider text-[#0B4D73] opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                            <i class="fas fa-arrow-right text-[9px]"></i>
+                            {{ $isUnread ? 'Mark as read & view' : 'View details' }}
+                        </span>
                     </div>
 
-                    <!-- Delete Swipe-like button -->
-                    <form action="{{ route('child.notifications.destroy', $notification->id) }}" method="POST"
-                        class="absolute top-5 right-5">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="p-2 text-slate-200 hover:text-red-500 transition-colors">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </form>
-                </div>
+                    <!-- Unread indicator -->
+                    @if($isUnread)
+                        <div class="w-2.5 h-2.5 rounded-full bg-blue-500 shrink-0 mt-2 ring-2 ring-white"></div>
+                    @endif
+                </a>
             @empty
-                <div class="p-20 text-center">
-                    <div
-                        class="w-20 h-20 bg-slate-50 rounded-[2rem] flex items-center justify-center mx-auto mb-4 border border-slate-100">
-                        <i class="fas fa-bell-slash text-3xl text-slate-200"></i>
+                <div class="bg-white rounded-[2rem] py-20 text-center border-2 border-dashed border-slate-200">
+                    <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-bell-slash text-2xl text-slate-300"></i>
                     </div>
-                    <h3 class="text-lg font-black text-slate-900 mb-1 tracking-tight">All Caught Up!</h3>
-                    <p class="text-xs text-slate-500 font-medium">No new alerts found in your journey.</p>
+                    <h3 class="text-lg font-black text-slate-400">All caught up!</h3>
+                    <p class="text-slate-400 text-xs mt-1">No notifications right now.</p>
                 </div>
             @endforelse
         </div>
 
-        <div class="mt-4">
-            {{ $notifications->links() }}
-        </div>
+        @if($notifications->hasPages())
+            <div class="pt-4">
+                {{ $notifications->links() }}
+            </div>
+        @endif
     </div>
 @endsection

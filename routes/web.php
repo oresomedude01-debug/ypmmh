@@ -230,6 +230,7 @@ Route::middleware(['auth', 'ensure_active'])->group(function () {
         // Notifications
         Route::get('notifications', [\App\Http\Controllers\Admin\NotificationController::class, 'index'])->name('notifications.index');
         Route::post('notifications/{id}/read', [\App\Http\Controllers\Admin\NotificationController::class, 'markAsRead'])->name('notifications.read');
+        Route::get('notifications/{id}/redirect', [\App\Http\Controllers\Admin\NotificationController::class, 'markAsReadAndRedirect'])->name('notifications.redirect');
         Route::post('notifications/read-all', [\App\Http\Controllers\Admin\NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
         Route::delete('notifications/{id}', [\App\Http\Controllers\Admin\NotificationController::class, 'destroy'])->name('notifications.destroy');
 
@@ -295,6 +296,7 @@ Route::middleware(['auth', 'ensure_active'])->group(function () {
         // Notifications
         Route::get('notifications', [\App\Http\Controllers\Mentor\NotificationController::class, 'index'])->name('notifications.index');
         Route::post('notifications/{id}/read', [\App\Http\Controllers\Mentor\NotificationController::class, 'markAsRead'])->name('notifications.read');
+        Route::get('notifications/{id}/redirect', [\App\Http\Controllers\Mentor\NotificationController::class, 'markAsReadAndRedirect'])->name('notifications.redirect');
         Route::post('notifications/read-all', [\App\Http\Controllers\Mentor\NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
         Route::delete('notifications/{id}', [\App\Http\Controllers\Mentor\NotificationController::class, 'destroy'])->name('notifications.destroy');
     });
@@ -311,6 +313,34 @@ Route::middleware(['auth', 'ensure_active'])->group(function () {
         Route::get('observations', [ParentDashboardController::class, 'observations'])->name('observations');
         Route::get('events', [\App\Http\Controllers\Parent\ParentEventController::class, 'index'])->name('events.index');
         Route::get('notifications', [ParentDashboardController::class, 'notifications'])->name('notifications');
+        Route::get('notifications/{id}/redirect', function ($id) {
+            $user = auth()->user();
+            $notification = $user->notifications()->where('id', $id)->first();
+            if (!$notification) {
+                return redirect()->route('parent.notifications');
+            }
+            $notification->markAsRead();
+            $type = $notification->data['type'] ?? null;
+            $url = match ($type) {
+                'new_program_available', 'program_update', 'enrollment_request', 'lesson_completion' => route('parent.programs.catalog'),
+                'blog_published', 'blog_post' => isset($notification->data['slug'])
+                    ? route('blog.show', $notification->data['slug'])
+                    : route('blog'),
+                'birthday' => isset($notification->data['child_id'])
+                    ? route('parent.children.show', $notification->data['child_id'])
+                    : route('parent.notifications'),
+                default    => route('parent.notifications'),
+            };
+            return redirect($url);
+        })->name('notifications.redirect');
+        Route::post('notifications/{id}/read', function ($id) {
+            auth()->user()->notifications()->where('id', $id)->first()?->markAsRead();
+            return back();
+        })->name('notifications.read');
+        Route::post('notifications/read-all', function () {
+            auth()->user()->unreadNotifications->markAsRead();
+            return back()->with('success', 'All notifications marked as read.');
+        })->name('notifications.read-all');
         Route::post('enrollments/{enrollment}/toggle', [ParentDashboardController::class, 'toggleEnrollment'])->name('enrollments.toggle');
         Route::get('programs/{program}/pass/{child}', [ParentDashboardController::class, 'printPass'])->name('programs.pass');
     });
@@ -344,6 +374,25 @@ Route::middleware(['auth', 'ensure_active'])->group(function () {
 
         // Notifications
         Route::get('notifications', [ChildDashboardController::class, 'notifications'])->name('notifications.index');
+        Route::get('notifications/{id}/redirect', function ($id) {
+            $user = auth()->user();
+            $notification = $user->notifications()->where('id', $id)->first();
+            if (!$notification) {
+                return redirect()->route('child.notifications.index');
+            }
+            $notification->markAsRead();
+            $type = $notification->data['type'] ?? null;
+            $url = match ($type) {
+                'new_program_available', 'program_update' => isset($notification->data['program_id'])
+                    ? route('child.programs.show', $notification->data['program_id'])
+                    : route('child.programs.index'),
+                'blog_published', 'blog_post' => isset($notification->data['slug'])
+                    ? route('blog.show', $notification->data['slug'])
+                    : route('blog'),
+                default => route('child.notifications.index'),
+            };
+            return redirect($url);
+        })->name('notifications.redirect');
         Route::post('notifications/{id}/read', function ($id) {
             auth()->user()->notifications()->where('id', $id)->first()?->markAsRead();
             return back();
