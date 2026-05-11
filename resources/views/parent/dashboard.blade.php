@@ -128,6 +128,9 @@
                                 <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3">Enrolled Programs</p>
                                 <div class="space-y-2">
                                     @foreach($child->enrollments as $enrollment)
+                                        @if(!$enrollment->program)
+                                            @continue
+                                        @endif
                                         <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 group/prog">
                                             <div class="flex items-center gap-3 min-w-0">
                                                 <div class="w-2 h-2 rounded-full {{ $enrollment->is_active ? 'bg-emerald-500 shadow-sm shadow-emerald-500/50' : 'bg-slate-300' }}"></div>
