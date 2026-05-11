@@ -63,7 +63,17 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 text-sm font-bold text-[#0B4D73]">
-                                    {{ $payment->program ? $payment->program->name : 'Deleted Program' }}</td>
+                                    @if($payment->program)
+                                        {{ $payment->program->name }}
+                                    @elseif($payment->description)
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-amber-50 text-amber-700 border border-amber-200">
+                                            <i class="fas fa-crown text-amber-600"></i>
+                                            {{ $payment->description }}
+                                        </span>
+                                    @else
+                                        <span class="text-slate-400 italic">Deleted Program</span>
+                                    @endif
+                                </td>
                                 <td class="px-6 py-4 font-mono text-sm font-black text-slate-700">
                                     {{ $payment->currency }} {{ number_format($payment->amount) }}
                                 </td>

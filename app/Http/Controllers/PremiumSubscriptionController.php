@@ -95,6 +95,7 @@ class PremiumSubscriptionController extends Controller
             'currency' => Setting::get('premium_currency', 'NGN'),
             'status' => 'pending',
             'payment_method' => 'paystack',
+            'description' => 'Premium Subscription - ' . ucfirst($plan) . ' Plan',
         ]);
 
         // Attach plan to session since payments table might not have 'plan' column

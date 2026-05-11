@@ -22,6 +22,7 @@ class SubscriptionController extends Controller
     {
         $request->validate([
             'program_id' => 'required|exists:programs,id',
+            'child_id' => 'nullable|exists:users,id',
         ]);
 
         $program = Program::findOrFail($request->program_id);
@@ -38,6 +39,28 @@ class SubscriptionController extends Controller
         if (!Auth::check()) {
             return redirect()->route('login')
                 ->with('info', 'Please log in to subscribe to "' . $program->name . '". Don\'t have an account? <a href="' . route('enroll') . '" class="underline font-bold">Register here</a>.');
+        }
+
+        // If child_id is provided, use it directly (skip selection)
+        if ($request->child_id) {
+            $child = User::findOrFail($request->child_id);
+            $user = Auth::user();
+
+            // Verify parent-child relationship
+            if ($user->hasRole('Parent') && $child->parent_id === $user->id) {
+                // Check if already enrolled
+                $existingEnrollment = Enrollment::where('user_id', $child->id)
+                    ->where('program_id', $program->id)
+                    ->first();
+
+                if ($existingEnrollment) {
+                    session()->forget('subscription_intent');
+                    return redirect()->route('parent.children.show', $child)
+                        ->with('info', $child->first_name . ' is already enrolled in this program.');
+                }
+
+                return $this->initiatePayment($program, $child->id, $user->id);
+            }
         }
 
         return $this->processAuthenticatedUser($program);

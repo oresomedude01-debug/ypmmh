@@ -108,7 +108,7 @@ class CheckPremiumSubscriptions extends Command
                 'currency' => \App\Models\Setting::get('premium_currency', 'NGN'),
                 'status' => 'success',
                 'payment_method' => 'paystack_recurring',
-                'description' => 'Auto-renewal of ' . $plan . ' premium subscription',
+                'description' => 'Premium Subscription Auto-Renewal - ' . ucfirst($plan) . ' Plan',
                 'paid_at' => now(),
             ]);
 
