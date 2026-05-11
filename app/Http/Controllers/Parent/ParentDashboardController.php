@@ -11,6 +11,7 @@ use App\Models\Report;
 use App\Models\Enrollment;
 use App\Models\Event;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class ParentDashboardController extends Controller
 {
@@ -50,10 +51,11 @@ class ParentDashboardController extends Controller
             'date_of_birth' => $request->date_of_birth,
             'gender' => $request->gender,
             'email' => $request->email,
-            'password' => Hash::make('password123'),
+            'password' => Hash::make(Str::random(32)), // Random unset password
             'parent_id' => Auth::id(),
             'relationship' => $request->relationship,
             'must_change_password' => true,
+            'email_verified_at' => null, // Not yet verified
         ];
 
         if ($request->hasFile('profile_picture')) {
@@ -68,10 +70,10 @@ class ParentDashboardController extends Controller
         $child->unique_number = 'CH' . date('Y') . str_pad($child->id, 4, '0', STR_PAD_LEFT);
         $child->save();
 
-        // Send Welcome & Credential Email
-        \Illuminate\Support\Facades\Mail::to($child->email)->queue(new \App\Mail\ChildWelcomeMail($child, Auth::user()));
+        // Send Email Verification Notification
+        $child->sendEmailVerificationNotification();
 
-        return redirect()->route('parent.dashboard')->with('success', $child->first_name . ' has been added to your family.');
+        return redirect()->route('parent.dashboard')->with('success', $child->first_name . ' has been added to your family. A verification email has been sent to ' . $child->email . '.');
     }
 
     public function reportProfileIssue(Request $request, User $child)
