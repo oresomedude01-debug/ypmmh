@@ -1,31 +1,33 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Access Denied</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gradient-to-br from-purple-50 to-pink-100 min-h-screen flex items-center justify-center p-4">
-    <div class="max-w-md w-full text-center">
-        <div class="mb-8">
-            <h1 class="text-6xl font-bold text-purple-600 mb-4">403</h1>
-            <h2 class="text-2xl font-semibold text-gray-800 mb-2">Access Denied</h2>
-            <p class="text-gray-600 mb-6">You don't have permission to access this resource.</p>
-        </div>
+@extends('errors.layout')
 
-        <div class="space-y-3">
-            <a href="/" class="inline-block w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">
-                Go to Home
-            </a>
-            <a href="javascript:history.back()" class="inline-block w-full bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-3 px-6 rounded-lg transition duration-200">
-                Go Back
-            </a>
-        </div>
+@section('title', '403 — Access Forbidden')
 
-        <div class="mt-8 text-sm text-gray-500">
-            <p>If you believe you should have access, please contact support.</p>
-        </div>
+@section('extra-style')
+<style>
+    .icon-wrap { background: linear-gradient(135deg, #fff7ed, #fed7aa); }
+    .pulse { animation: pulse 2s cubic-bezier(0.4,0,0.6,1) infinite; }
+    @keyframes pulse { 0%, 100% { opacity:1; } 50% { opacity:.7; } }
+</style>
+@endsection
+
+@section('body')
+    <div class="icon-wrap pulse">
+        <i class="fas fa-shield-halved" style="font-size:2.5rem; color:#f97316;"></i>
     </div>
-</body>
-</html>
+
+    <div style="display:inline-block; background:#fff7ed; color:#ea580c; font-size:0.65rem; font-weight:900; text-transform:uppercase; letter-spacing:0.12em; padding:0.3rem 0.9rem; border-radius:999px; margin-bottom:1rem;">
+        Error 403
+    </div>
+
+    <h1>Access Restricted</h1>
+    <p>You don't have permission to view this page. If you believe this is a mistake, please contact the administration team.</p>
+
+    <div class="btn-group">
+        <a href="/" class="btn btn-primary">
+            <i class="fas fa-home"></i> Go Home
+        </a>
+        <a href="javascript:history.back()" class="btn btn-ghost">
+            <i class="fas fa-arrow-left"></i> Go Back
+        </a>
+    </div>
+@endsection

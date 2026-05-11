@@ -1,31 +1,31 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Unauthorized</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gradient-to-br from-blue-50 to-cyan-100 min-h-screen flex items-center justify-center p-4">
-    <div class="max-w-md w-full text-center">
-        <div class="mb-8">
-            <h1 class="text-6xl font-bold text-blue-600 mb-4">401</h1>
-            <h2 class="text-2xl font-semibold text-gray-800 mb-2">Unauthorized</h2>
-            <p class="text-gray-600 mb-6">You need to log in to access this resource.</p>
-        </div>
+@extends('errors.layout')
 
-        <div class="space-y-3">
-            <a href="/login" class="inline-block w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">
-                Go to Login
-            </a>
-            <a href="/" class="inline-block w-full bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-3 px-6 rounded-lg transition duration-200">
-                Go to Home
-            </a>
-        </div>
+@section('title', '401 — Unauthenticated')
 
-        <div class="mt-8 text-sm text-gray-500">
-            <p>Don't have an account? <a href="/register" class="text-blue-600 hover:underline">Register here</a></p>
-        </div>
+@section('extra-style')
+<style>
+    .icon-wrap { background: linear-gradient(135deg, #f0fdf4, #bbf7d0); }
+</style>
+@endsection
+
+@section('body')
+    <div class="icon-wrap">
+        <i class="fas fa-lock" style="font-size:2.5rem; color:#16a34a;"></i>
     </div>
-</body>
-</html>
+
+    <div style="display:inline-block; background:#f0fdf4; color:#15803d; font-size:0.65rem; font-weight:900; text-transform:uppercase; letter-spacing:0.12em; padding:0.3rem 0.9rem; border-radius:999px; margin-bottom:1rem;">
+        Error 401
+    </div>
+
+    <h1>Authentication Required</h1>
+    <p>You must be signed in to access this page. Please log in with your account credentials to continue.</p>
+
+    <div class="btn-group">
+        <a href="{{ route('login') }}" class="btn btn-primary">
+            <i class="fas fa-sign-in-alt"></i> Sign In
+        </a>
+        <a href="/" class="btn btn-ghost">
+            <i class="fas fa-home"></i> Go Home
+        </a>
+    </div>
+@endsection

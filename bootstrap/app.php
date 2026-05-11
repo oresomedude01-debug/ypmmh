@@ -34,26 +34,39 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        // Handle CSRF token mismatch
+        // CSRF / session expiry → silently redirect to login with a friendly message
         $exceptions->render(function (\Illuminate\Session\TokenMismatchException $e, \Illuminate\Http\Request $request) {
-            return redirect('/')->with('error', 'Your session expired. Please refresh or try again.');
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Session expired. Please log in again.'], 419);
+            }
+            return redirect()->route('login')
+                ->with('status', 'Your session expired. Please log in again to continue.');
         });
 
-        // Render custom error pages in production
+        // Unauthenticated → redirect to login instead of throwing
+        $exceptions->render(function (\Illuminate\Auth\AuthenticationException $e, \Illuminate\Http\Request $request) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Unauthenticated.'], 401);
+            }
+            return redirect()->guest(route('login'))
+                ->with('status', 'Please log in to continue.');
+        });
+
+        // Custom error pages in all environments
         $exceptions->respond(function (\Symfony\Component\HttpFoundation\Response $response) {
-            // Only render custom pages in production when APP_DEBUG is false
-            if (app()->environment('production') && ! config('app.debug')) {
-                if ($response->getStatusCode() === 404) {
-                    return response()->view('errors.404', [], 404);
-                } elseif ($response->getStatusCode() === 500) {
-                    return response()->view('errors.500', [], 500);
-                } elseif ($response->getStatusCode() === 503) {
-                    return response()->view('errors.503', [], 503);
-                } elseif ($response->getStatusCode() === 403) {
-                    return response()->view('errors.403', [], 403);
-                } elseif ($response->getStatusCode() === 401) {
-                    return response()->view('errors.401', [], 401);
-                }
+            $code = $response->getStatusCode();
+
+            $errorViews = [
+                401 => 'errors.401',
+                403 => 'errors.403',
+                404 => 'errors.404',
+                419 => 'errors.419',
+                500 => 'errors.500',
+                503 => 'errors.503',
+            ];
+
+            if (isset($errorViews[$code]) && view()->exists($errorViews[$code])) {
+                return response()->view($errorViews[$code], [], $code);
             }
 
             return $response;

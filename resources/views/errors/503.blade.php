@@ -1,28 +1,35 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Service Unavailable</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gradient-to-br from-yellow-50 to-orange-100 min-h-screen flex items-center justify-center p-4">
-    <div class="max-w-md w-full text-center">
-        <div class="mb-8">
-            <h1 class="text-6xl font-bold text-orange-600 mb-4">503</h1>
-            <h2 class="text-2xl font-semibold text-gray-800 mb-2">Service Unavailable</h2>
-            <p class="text-gray-600 mb-6">We're currently performing maintenance. Please check back shortly.</p>
-        </div>
+@extends('errors.layout')
 
-        <div class="space-y-3">
-            <a href="/" class="inline-block w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">
-                Go to Home
-            </a>
-        </div>
+@section('title', '503 — Under Maintenance')
 
-        <div class="mt-8 text-sm text-gray-500">
-            <p>Thank you for your patience while we improve our service.</p>
-        </div>
+@section('extra-style')
+<style>
+    .icon-wrap { background: linear-gradient(135deg, #f5f3ff, #ddd6fe); }
+    .spin-slow { animation: spin 4s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+@endsection
+
+@section('body')
+    <div class="icon-wrap">
+        <i class="fas fa-gear spin-slow" style="font-size:2.5rem; color:#7c3aed;"></i>
     </div>
-</body>
-</html>
+
+    <div style="display:inline-block; background:#f5f3ff; color:#6d28d9; font-size:0.65rem; font-weight:900; text-transform:uppercase; letter-spacing:0.12em; padding:0.3rem 0.9rem; border-radius:999px; margin-bottom:1rem;">
+        Maintenance Mode
+    </div>
+
+    <h1>We're Polishing Things Up</h1>
+    <p>YPMMH is currently undergoing scheduled maintenance to bring you a better experience. We'll be back very soon — JazakAllahu Khayran for your patience.</p>
+
+    <div class="btn-group">
+        <a href="javascript:location.reload()" class="btn btn-primary">
+            <i class="fas fa-rotate-right"></i> Refresh Page
+        </a>
+    </div>
+
+    <script>
+        // Auto-refresh every 60 seconds during maintenance
+        setTimeout(() => location.reload(), 60000);
+    </script>
+@endsection

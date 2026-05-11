@@ -31,6 +31,10 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        // Force persistent remember-me token so users stay logged in for 30 days
+        // regardless of whether they ticked the "remember me" checkbox.
+        Auth::login(Auth::user(), remember: true);
+
         // Check if there's a pending subscription to resume
         if (session('subscription_intent')) {
             return redirect()->route('subscription.resume');
