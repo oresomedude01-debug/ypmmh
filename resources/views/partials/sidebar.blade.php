@@ -256,6 +256,11 @@
                     class="menu-item {{ request()->routeIs('admin.payments.*') ? 'active' : 'glass-hover' }} flex items-center gap-3 px-4 py-3 rounded-lg mb-2">
                     <i class="fas fa-credit-card w-5"></i>
                     <span class="font-medium">Payments</span></a>
+
+                <a href="{{route('admin.premiums.index')}}"
+                    class="menu-item {{ request()->routeIs('admin.premiums.*') ? 'active' : 'glass-hover' }} flex items-center gap-3 px-4 py-3 rounded-lg mb-2">
+                    <i class="fas fa-crown w-5 text-yellow-500"></i>
+                    <span class="font-medium">Premium Subscriptions</span></a>
             </div>
 
             <!-- Settings Section -->

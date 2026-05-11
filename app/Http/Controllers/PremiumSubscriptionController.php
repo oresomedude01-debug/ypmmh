@@ -80,10 +80,9 @@ class PremiumSubscriptionController extends Controller
         
         $price = Setting::get($priceKey, 0);
 
-        // If price is 0, just grant it free conditionally
+        // Premium always requires payment - no free tier
         if ($price <= 0) {
-            $this->grantPremium($targetChild, $plan);
-            return redirect()->route('premium.success')->with('success', 'Premium activated successfully!');
+            return back()->with('error', 'Premium pricing is not configured. Please contact support.');
         }
 
         // Create pending payment record
@@ -177,10 +176,47 @@ class PremiumSubscriptionController extends Controller
         return view('premium.success');
     }
 
+    /**
+     * Toggle auto-renewal for the authenticated user's premium subscription
+     */
+    public function toggleAutoRenewal(Request $request)
+    {
+        $user = Auth::user();
+        
+        if ($user->hasRole('Child')) {
+            $targetUser = $user;
+        } elseif ($user->hasRole('Parent')) {
+            $childId = $request->input('child_id');
+            $targetUser = User::find($childId);
+            
+            if (!$targetUser || $targetUser->parent_id !== $user->id) {
+                return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+            }
+        } else {
+            return response()->json(['success' => false, 'message' => 'Only parents and children can manage auto-renewal'], 403);
+        }
+
+        if ($targetUser->premium_status !== 'active') {
+            return response()->json(['success' => false, 'message' => 'Only active subscriptions can enable auto-renewal'], 400);
+        }
+
+        $targetUser->auto_renewal_enabled = !$targetUser->auto_renewal_enabled;
+        $targetUser->save();
+
+        $status = $targetUser->auto_renewal_enabled ? 'enabled' : 'disabled';
+        
+        return response()->json([
+            'success' => true,
+            'message' => "Auto-renewal has been {$status}",
+            'auto_renewal_enabled' => $targetUser->auto_renewal_enabled,
+        ]);
+    }
+
     private function grantPremium(User $child, string $plan)
     {
         $child->premium_status = 'active';
         $child->premium_plan = $plan;
+        $child->auto_renewal_enabled = true; // Enable auto-renewal by default
         
         $currentEndsAt = ($child->premium_ends_at && $child->premium_ends_at->isFuture()) 
             ? $child->premium_ends_at 

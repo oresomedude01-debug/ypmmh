@@ -11,3 +11,4 @@ Artisan::command('inspire', function () {
 
 Schedule::command('programs:sync-rolling')->daily();
 Schedule::command('users:remind-verification')->dailyAt('10:00');
+Schedule::command('premium:check-subscriptions')->daily();

@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\ProgramContentController as AdminProgramContentCo
 use App\Http\Controllers\Admin\CohortController as AdminCohortController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\AdminMailController;
+use App\Http\Controllers\Admin\PremiumController as AdminPremiumController;
 use App\Http\Controllers\Mentor\MentorDashboardController;
 use App\Http\Controllers\Mentor\MentorProgramController;
 use App\Http\Controllers\Mentor\LessonController as MentorLessonController;
@@ -227,6 +228,13 @@ Route::middleware(['auth', 'ensure_active', 'force_password_change'])->group(fun
         Route::patch('reports/{report}', [\App\Http\Controllers\Admin\ReportController::class, 'update'])->name('reports.update');
         Route::delete('reports/{report}', [\App\Http\Controllers\Admin\ReportController::class, 'destroy'])->name('reports.destroy');
         Route::get('payments', [\App\Http\Controllers\Admin\AdminPaymentController::class, 'index'])->name('payments.index');
+        
+        // Premium Subscriptions
+        Route::get('premiums', [AdminPremiumController::class, 'index'])->name('premiums.index');
+        Route::post('premiums/{user}/extend', [AdminPremiumController::class, 'extend'])->name('premiums.extend');
+        Route::post('premiums/{user}/reactivate', [AdminPremiumController::class, 'reactivate'])->name('premiums.reactivate');
+        Route::delete('premiums/{user}/cancel', [AdminPremiumController::class, 'cancel'])->name('premiums.cancel');
+        
         Route::get('coming-soon', [AdminDashboardController::class, 'comingSoon'])->name('coming-soon');
 
         // Events
@@ -433,6 +441,7 @@ Route::middleware(['auth', 'ensure_active', 'force_password_change'])->group(fun
     Route::post('premium/checkout', [\App\Http\Controllers\PremiumSubscriptionController::class, 'checkout'])->name('premium.checkout');
     Route::get('premium/verify', [\App\Http\Controllers\PremiumSubscriptionController::class, 'verify'])->name('premium.verify');
     Route::get('premium/success', [\App\Http\Controllers\PremiumSubscriptionController::class, 'success'])->name('premium.success');
+    Route::post('premium/toggle-auto-renewal', [\App\Http\Controllers\PremiumSubscriptionController::class, 'toggleAutoRenewal'])->name('premium.toggle-auto-renewal');
 });
 
 require __DIR__ . '/auth.php';
