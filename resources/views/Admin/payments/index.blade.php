@@ -64,14 +64,39 @@
                                 </td>
                                 <td class="px-6 py-4 text-sm font-bold text-[#0B4D73]">
                                     @if($payment->program)
-                                        {{ $payment->program->name }}
+                                        {{-- Regular program payment --}}
+                                        <span class="flex items-center gap-1.5">
+                                            <i class="fas fa-book-open text-slate-400 text-xs"></i>
+                                            {{ $payment->program->name }}
+                                        </span>
+                                    @elseif($payment->description && str_contains(strtolower($payment->description), 'premium'))
+                                        {{-- Premium subscription payment --}}
+                                        @php
+                                            // Extract plan from description e.g. "Premium Subscription - Monthly Plan"
+                                            preg_match('/(monthly|termly|annually)/i', $payment->description, $planMatch);
+                                            $planLabel = isset($planMatch[1]) ? ucfirst(strtolower($planMatch[1])) : null;
+                                            // Detect if it's a stacked renewal
+                                            $isRenewal = str_contains(strtolower($payment->description), 'renewal');
+                                        @endphp
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 text-xs font-black">
+                                            <i class="fas fa-crown text-amber-500"></i>
+                                            Premium{{ $planLabel ? ' — ' . $planLabel : '' }}{{ $isRenewal ? ' (Renewal)' : '' }}
+                                        </span>
                                     @elseif($payment->description)
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-amber-50 text-amber-700 border border-amber-200">
-                                            <i class="fas fa-crown text-amber-600"></i>
-                                            {{ $payment->description }}
+                                        {{-- Any other described payment --}}
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-blue-50 text-blue-700 border border-blue-100 text-xs font-semibold">
+                                            <i class="fas fa-tag text-blue-400 text-[10px]"></i>
+                                            {{ Str::limit($payment->description, 40) }}
+                                        </span>
+                                    @elseif($payment->program_id)
+                                        {{-- program_id exists but program was deleted --}}
+                                        <span class="text-slate-400 italic text-xs">
+                                            <i class="fas fa-exclamation-circle text-slate-300 mr-1"></i>
+                                            Deleted Program
                                         </span>
                                     @else
-                                        <span class="text-slate-400 italic">Deleted Program</span>
+                                        {{-- No program_id at all = general/unknown --}}
+                                        <span class="text-slate-400 italic text-xs">—</span>
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 font-mono text-sm font-black text-slate-700">

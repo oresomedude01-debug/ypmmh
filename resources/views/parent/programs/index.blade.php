@@ -17,6 +17,74 @@
         </div>
     </div>
 
+    @if(isset($spotlight) && $spotlight)
+    @php
+        $sp        = $spotlight;
+        $spProgram = $sp['program'];
+        $spChild   = $sp['child'];
+        $spReason  = $sp['reason'];
+        $spKey     = 'spotlight_dismissed_' . $spProgram->id;
+    @endphp
+    {{-- Spotlight Card: dismissible, throttled client-side via localStorage --}}
+    <div id="spotlightCard"
+        class="relative overflow-hidden rounded-[2rem] border border-amber-200 bg-gradient-to-br from-amber-50 via-white to-yellow-50 shadow-lg shadow-amber-100/60 animate-fade-in transition-all"
+        style="display:none">
+
+        {{-- Decorative glow --}}
+        <div class="absolute -top-10 -right-10 w-48 h-48 bg-yellow-300/20 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="flex items-start gap-5 p-6 md:p-8">
+
+            {{-- Thumbnail or icon --}}
+            <div class="shrink-0 w-20 h-20 rounded-2xl overflow-hidden bg-gradient-to-br from-[#0B4D73] to-blue-500 flex items-center justify-center shadow-lg">
+                @if($spProgram->thumbnail_path)
+                    <img src="{{ asset('storage/' . $spProgram->thumbnail_path) }}" class="w-full h-full object-cover" alt="{{ $spProgram->name }}">
+                @else
+                    <i class="fas fa-graduation-cap text-white/70 text-3xl"></i>
+                @endif
+            </div>
+
+            {{-- Body --}}
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-400 text-amber-900 text-[9px] font-black uppercase tracking-widest rounded-full">
+                        <i class="fas fa-star text-[8px]"></i> Spotlight for {{ $spChild->first_name }}
+                    </span>
+                    @if($spProgram->is_free)
+                    <span class="px-2.5 py-1 bg-emerald-100 text-emerald-700 text-[9px] font-black uppercase tracking-widest rounded-full">Free</span>
+                    @endif
+                </div>
+
+                <h3 class="text-lg font-black text-slate-900 leading-tight truncate">{{ $spProgram->name }}</h3>
+                <p class="text-sm text-slate-500 mt-0.5 line-clamp-1">{{ $spReason }}</p>
+
+                <div class="flex items-center gap-3 mt-4">
+                    <button
+                        onclick="openEnrollModal({{ $spProgram->id }}, '{{ addslashes($spProgram->name) }}', {{ json_encode($spProgram->eligible_child_ids ?? [$spChild->id]) }})"
+                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#0B4D73] to-blue-600 text-white text-xs font-black uppercase tracking-widest rounded-2xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all">
+                        <i class="fas fa-user-plus"></i> Enrol Now
+                    </button>
+                    <a href="{{ route('parent.programs.catalog') }}"
+                        class="text-xs font-bold text-slate-500 hover:text-[#0B4D73] transition-colors">
+                        View All Programs
+                    </a>
+                </div>
+            </div>
+
+            {{-- Dismiss button --}}
+            <button id="spotlightDismiss"
+                onclick="dismissSpotlight({{ $spProgram->id }})"
+                class="shrink-0 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-600 flex items-center justify-center transition-all self-start"
+                aria-label="Dismiss">
+                <i class="fas fa-times text-xs"></i>
+            </button>
+        </div>
+
+        {{-- Progress bar showing how 'fresh' the recommendation is (just cosmetic) --}}
+        <div class="h-0.5 bg-gradient-to-r from-amber-400 via-yellow-300 to-transparent"></div>
+    </div>
+    @endif
+
     @if($featuredPrograms->isNotEmpty())
     <!-- Featured Programs Carousel -->
     <div class="relative group">
@@ -451,5 +519,92 @@ window.onclick = function(event) {
         closeTrailer();
     }
 }
+
+// ─── Program Spotlight ──────────────────────────────────────────────────────
+@if(isset($spotlight) && $spotlight)
+(function() {
+    const programId = {{ $spotlight['program']->id }};
+    const key       = 'spotlight_dismissed_' + programId;
+    const card      = document.getElementById('spotlightCard');
+    if (!card) return;
+
+    const lastDismissed = localStorage.getItem(key);
+    const oneDayMs      = 24 * 60 * 60 * 1000;   // 24 h
+
+    // Show the card if never dismissed or dismissed more than 24h ago
+    if (!lastDismissed || (Date.now() - parseInt(lastDismissed)) > oneDayMs) {
+        // Small delay so it feels like a natural appearance, not an intrusive popup
+        setTimeout(() => {
+            card.style.display = 'block';
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(-8px)';
+            requestAnimationFrame(() => {
+                card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            });
+        }, 1800);   // 1.8 s after page load
+    }
+})();
+@endif
+
+function dismissSpotlight(programId) {
+    const card = document.getElementById('spotlightCard');
+    if (!card) return;
+    card.style.transition = 'opacity 0.3s ease, transform 0.3s ease, max-height 0.4s ease, margin 0.4s ease, padding 0.4s ease';
+    card.style.opacity    = '0';
+    card.style.transform  = 'translateY(-6px)';
+    setTimeout(() => { card.style.display = 'none'; }, 350);
+    localStorage.setItem('spotlight_dismissed_' + programId, Date.now().toString());
+}
+
+// ─── Push Notification Trigger ──────────────────────────────────────────────
+// Uses the existing SW registration. Fires a local push payload so parents see
+// the spotlight even when the tab is backgrounded (on the next visit after the
+// server has queued the DB notification).
+(function initSpotlightPush() {
+    @if(isset($spotlight) && $spotlight)
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+
+    const programId   = {{ $spotlight['program']->id }};
+    const programName = @json($spotlight['program']->name);
+    const childName   = @json($spotlight['child']->first_name);
+    const reason      = @json($spotlight['reason']);
+    const catalogUrl  = @json(route('parent.programs.catalog'));
+    const pushKey     = 'spotlight_pushed_' + programId;
+
+    // Only fire push once per 7 days per program
+    const lastPush = localStorage.getItem(pushKey);
+    const sevenDays = 7 * 24 * 60 * 60 * 1000;
+    if (lastPush && (Date.now() - parseInt(lastPush)) < sevenDays) return;
+
+    // Wait until the user has been on the page a bit (not intrusive)
+    setTimeout(async () => {
+        try {
+            const reg = await navigator.serviceWorker.ready;
+            const perm = await Notification.requestPermission();
+            if (perm !== 'granted') return;
+
+            // Show local notification via SW
+            await reg.showNotification('🌟 Perfect for ' + childName + '!', {
+                body: programName + ' — ' + reason,
+                icon: '/icons/icon-192x192.png',
+                badge: '/icons/badge-72x72.png',
+                tag: 'spotlight-' + programId,
+                renotify: false,
+                data: { url: catalogUrl },
+                actions: [
+                    { action: 'view',    title: 'View Program' },
+                    { action: 'dismiss', title: 'Dismiss'      },
+                ],
+            });
+
+            localStorage.setItem(pushKey, Date.now().toString());
+        } catch (e) {
+            // Push not available — silently skip
+        }
+    }, 8000);   // 8 s delay — only fires if parent stays on page
+    @endif
+})();
 </script>
 @endsection

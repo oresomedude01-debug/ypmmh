@@ -10,6 +10,8 @@ use App\Models\Observation;
 use App\Models\Report;
 use App\Models\Enrollment;
 use App\Models\Event;
+use App\Models\Program;
+use App\Services\ProgramRecommendationService;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
@@ -288,7 +290,17 @@ class ParentDashboardController extends Controller
             $p->eligible_child_ids = $calculateEligibility($p);
         });
 
-        return view('parent.programs.index', compact('availablePrograms', 'children', 'featuredPrograms'));
+        // Fire a throttled spotlight notification (once per 7 days per program)
+        // and pass the best recommendation to the view for the in-app card
+        $recommender = app(ProgramRecommendationService::class);
+        $spotlight   = $recommender->getSpotlightForParent($user);
+
+        // Dispatch notification asynchronously so it doesn't slow page load
+        dispatch(function () use ($user, $recommender) {
+            $recommender->maybeSendSpotlightNotification($user);
+        })->afterResponse();
+
+        return view('parent.programs.index', compact('availablePrograms', 'children', 'featuredPrograms', 'spotlight'));
     }
 
     public function subscribe(Request $request)
