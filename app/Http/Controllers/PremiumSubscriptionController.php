@@ -150,7 +150,36 @@ class PremiumSubscriptionController extends Controller
                     $targetChild = User::find($payment->child_id);
 
                     if ($targetChild) {
+                        $previousExpiryDate = $targetChild->premium_ends_at && $targetChild->premium_ends_at->isFuture() 
+                            ? $targetChild->premium_ends_at 
+                            : null;
+                        
                         $this->grantPremium($targetChild, $plan);
+                        
+                        // Send confirmation notification
+                        $targetChild->notify(new \App\Notifications\SubscriptionConfirmedNotification(
+                            $targetChild,
+                            $plan,
+                            $payment->amount,
+                            $payment->currency,
+                            $targetChild->premium_ends_at,
+                            $payment->transaction_id
+                        ));
+                        
+                        // If this was a renewal, also notify parent
+                        if ($previousExpiryDate && $targetChild->parent_id) {
+                            $parent = User::find($targetChild->parent_id);
+                            if ($parent) {
+                                $parent->notify(new \App\Notifications\SubscriptionConfirmedNotification(
+                                    $targetChild,
+                                    $plan,
+                                    $payment->amount,
+                                    $payment->currency,
+                                    $targetChild->premium_ends_at,
+                                    $payment->transaction_id
+                                ));
+                            }
+                        }
                     }
 
                     return redirect()->route('premium.success')->with('success', 'Premium subscription successful!');

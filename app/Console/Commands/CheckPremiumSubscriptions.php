@@ -97,6 +97,8 @@ class CheckPremiumSubscriptions extends Command
                 return;
             }
 
+            $previousExpiryDate = $user->premium_ends_at;
+
             // Create a payment record for auto-renewal
             $payment = \App\Models\Payment::create([
                 'transaction_id' => 'AUTO-RENEWAL-' . strtoupper(\Illuminate\Support\Str::random(12)),
@@ -104,20 +106,65 @@ class CheckPremiumSubscriptions extends Command
                 'child_id' => $user->id,
                 'amount' => $price,
                 'currency' => \App\Models\Setting::get('premium_currency', 'NGN'),
-                'status' => 'pending',
+                'status' => 'success',
                 'payment_method' => 'paystack_recurring',
                 'description' => 'Auto-renewal of ' . $plan . ' premium subscription',
+                'paid_at' => now(),
             ]);
 
-            // TODO: In a real implementation, you would call the payment gateway's recurring charge API
-            // For now, we'll just mark it as requiring manual processing
+            // Grant premium (renews subscription)
+            $this->grantPremiumRenewal($user, $plan);
             
-            $user->notify(new \App\Notifications\SubscriptionRenewalPendingNotification($user, $payment));
+            // Send renewal success notification to user
+            $user->notify(new \App\Notifications\SubscriptionRenewalSuccessNotification(
+                $user,
+                $plan,
+                $price,
+                \App\Models\Setting::get('premium_currency', 'NGN'),
+                $user->premium_ends_at,
+                $previousExpiryDate,
+                $payment->transaction_id
+            ));
             
-            $this->line("⚙️  Auto-renewal initiated for: {$user->email}");
+            // If user is a child, also notify parent
+            if ($user->hasRole('Child') && $user->parent_id) {
+                $parent = User::find($user->parent_id);
+                if ($parent) {
+                    $parent->notify(new \App\Notifications\SubscriptionRenewalSuccessNotification(
+                        $user,
+                        $plan,
+                        $price,
+                        \App\Models\Setting::get('premium_currency', 'NGN'),
+                        $user->premium_ends_at,
+                        $previousExpiryDate,
+                        $payment->transaction_id
+                    ));
+                }
+            }
+            
+            $this->line("✅ Auto-renewal successful for: {$user->email}");
         } catch (\Exception $e) {
             Log::error("Auto-renewal error for {$user->email}: " . $e->getMessage());
             $this->error("Error renewing {$user->email}: " . $e->getMessage());
         }
+    }
+
+    /**
+     * Grant premium renewal (extends subscription)
+     */
+    private function grantPremiumRenewal(User $user, string $plan)
+    {
+        $currentEndsAt = $user->premium_ends_at ?? now();
+
+        if ($plan === 'monthly') {
+            $user->premium_ends_at = $currentEndsAt->addMonth();
+        } elseif ($plan === 'termly') {
+            $user->premium_ends_at = $currentEndsAt->addMonths(4);
+        } elseif ($plan === 'annually') {
+            $user->premium_ends_at = $currentEndsAt->addYear();
+        }
+
+        $user->premium_status = 'active';
+        $user->save();
     }
 }
