@@ -74,8 +74,10 @@
                                         @if($program->mentor && $program->mentor->profile_picture)
                                             <img src="{{ asset('storage/' . $program->mentor->profile_picture) }}"
                                                 class="w-full h-full object-cover">
-                                        @else
+                                        @elseif($program->mentor)
                                             {{ substr($program->mentor->first_name ?? 'M', 0, 1) }}
+                                        @else
+                                            M
                                         @endif
                                     </div>
                                     <p class="text-[10px] text-slate-500 font-bold truncate">

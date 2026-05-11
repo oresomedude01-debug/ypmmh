@@ -256,9 +256,9 @@
                                             </div>
                                         </td>
                                         <td class="px-6 py-4" style="background-color: transparent;">
-                                            @if($student->enrollments->count() > 0)
+                                            @if($student->enrollments->count() > 0 && $student->enrollments->first()->program)
                                                 <span
-                                                    class="text-xs font-semibold" style="color: var(--text-secondary);">{{ $student->enrollments->first()->program->name ?? 'N/A' }}</span>
+                                                    class="text-xs font-semibold" style="color: var(--text-secondary);">{{ $student->enrollments->first()->program->name }}</span>
                                             @else
                                                 <span
                                                     class="text-[10px] font-bold text-amber-500 bg-amber-500/10 px-2 py-1 rounded-lg">Waitlisted</span>
@@ -292,7 +292,7 @@
                                         <span class="text-[9px] font-bold px-1.5 py-0.5 rounded uppercase bg-emerald-500/10 text-emerald-500">Active</span>
                                     </div>
                                     <p class="text-[10px] truncate opacity-70 mb-1" style="color: var(--text-secondary);">
-                                        {{ $student->enrollments->count() > 0 ? $student->enrollments->first()->program->name : 'Waitlisted' }}
+                                        {{ $student->enrollments->count() > 0 && $student->enrollments->first()->program ? $student->enrollments->first()->program->name : 'Waitlisted' }}
                                     </p>
                                     <p class="text-[9px] font-bold" style="color: var(--text-secondary);">
                                         Joined {{ $student->created_at->diffForHumans() }}

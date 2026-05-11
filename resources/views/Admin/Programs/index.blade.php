@@ -354,7 +354,7 @@
                         class="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-black">
                         {{ substr($p->mentor->first_name, 0, 1) }}
                       </div>
-                      <span class="text-xs font-bold text-slate-700">{{ $p->mentor->name }}</span>
+                      <span class="text-xs font-bold text-slate-700">{{ $p->mentor->full_name }}</span>
                     </div>
                   @else
                     <span class="text-[10px] font-bold text-slate-300 italic">Unassigned</span>

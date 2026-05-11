@@ -21,6 +21,7 @@
 
         <!-- Enrollment Details Card -->
         <div class="bg-white rounded-3xl shadow-xl border border-slate-100 p-8 text-left mb-8">
+            @if($payment->program)
             <div class="flex items-center gap-4 mb-6 pb-6 border-b border-slate-100">
                 <div class="w-16 h-16 rounded-2xl overflow-hidden bg-slate-100">
                     @if($payment->program->thumbnail_path)
@@ -39,6 +40,11 @@
                         class="px-2 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase rounded-lg">Enrolled</span>
                 </div>
             </div>
+            @else
+            <div class="rounded-2xl border-2 border-amber-100 bg-amber-50 p-6 text-center">
+                <p class="text-amber-700 font-semibold">Program information is not available</p>
+            </div>
+            @endif
 
             <div class="space-y-4">
                 <div class="flex items-center justify-between">
@@ -73,10 +79,15 @@
                     class="block w-full py-4 bg-gradient-to-r from-[#0B4D73] to-cyan-600 text-white font-bold rounded-xl shadow-lg hover:-translate-y-0.5 transition-all">
                     <i class="fas fa-eye mr-2"></i> View {{ $payment->child->first_name }}'s Progress
                 </a>
-            @else
+            @elseif($payment->program)
                 <a href="{{ route('child.programs.show', $payment->program) }}"
                     class="block w-full py-4 bg-gradient-to-r from-[#0B4D73] to-cyan-600 text-white font-bold rounded-xl shadow-lg hover:-translate-y-0.5 transition-all">
                     <i class="fas fa-play mr-2"></i> Start Learning Now
+                </a>
+            @else
+                <a href="{{ route('child.dashboard') }}"
+                    class="block w-full py-4 bg-gradient-to-r from-[#0B4D73] to-cyan-600 text-white font-bold rounded-xl shadow-lg hover:-translate-y-0.5 transition-all">
+                    <i class="fas fa-play mr-2"></i> Go to Dashboard
                 </a>
             @endif
 

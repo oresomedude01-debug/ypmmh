@@ -89,6 +89,9 @@
 
                 <div class="space-y-4">
                     @foreach($child->enrollments as $enrollment)
+                        @if(!$enrollment->program)
+                            @continue
+                        @endif
                         <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
                             <div class="flex justify-between items-start mb-4">
                                 <div>
@@ -135,6 +138,9 @@
                     </h2>
                     <div class="space-y-4">
                         @forelse($child->observations as $obs)
+                            @if(!$obs->mentor)
+                                @continue
+                            @endif
                             <div class="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm relative">
                                 <i class="fas fa-quote-right absolute top-6 right-8 text-slate-50 text-5xl"></i>
                                 <div class="relative z-10">

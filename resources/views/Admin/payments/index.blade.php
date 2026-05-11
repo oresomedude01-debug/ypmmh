@@ -63,7 +63,7 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 text-sm font-bold text-[#0B4D73]">
-                                    {{ $payment->program->name ?? 'Deleted Program' }}</td>
+                                    {{ $payment->program ? $payment->program->name : 'Deleted Program' }}</td>
                                 <td class="px-6 py-4 font-mono text-sm font-black text-slate-700">
                                     {{ $payment->currency }} {{ number_format($payment->amount) }}
                                 </td>

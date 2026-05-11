@@ -293,7 +293,7 @@
                             <div class="space-y-1">
                                 <label class="text-sm font-semibold text-slate-700">Parent First Name</label>
                                 <input type="text" name="parent_first_name"
-                                    value="{{ old('parent_first_name', $user->parent->first_name ?? '') }}"
+                                    value="{{ old('parent_first_name', $user->parent ? $user->parent->first_name : '') }}"
                                     class="w-full px-4 py-2.5 bg-white/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0B4D73] focus:bg-white transition-all placeholder:text-slate-400"
                                     placeholder="John">
                             </div>
@@ -301,7 +301,7 @@
                             <div class="space-y-1">
                                 <label class="text-sm font-semibold text-slate-700">Parent Last Name</label>
                                 <input type="text" name="parent_last_name"
-                                    value="{{ old('parent_last_name', $user->parent->last_name ?? '') }}"
+                                    value="{{ old('parent_last_name', $user->parent ? $user->parent->last_name : '') }}"
                                     class="w-full px-4 py-2.5 bg-white/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0B4D73] focus:bg-white transition-all placeholder:text-slate-400"
                                     placeholder="Doe">
                             </div>
