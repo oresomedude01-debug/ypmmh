@@ -441,7 +441,12 @@ Route::middleware(['auth', 'ensure_active', 'force_password_change'])->group(fun
     Route::post('premium/checkout', [\App\Http\Controllers\PremiumSubscriptionController::class, 'checkout'])->name('premium.checkout');
     Route::get('premium/verify', [\App\Http\Controllers\PremiumSubscriptionController::class, 'verify'])->name('premium.verify');
     Route::get('premium/success', [\App\Http\Controllers\PremiumSubscriptionController::class, 'success'])->name('premium.success');
+    // AJAX toggle (kept for potential JS-only callers)
     Route::post('premium/toggle-auto-renewal', [\App\Http\Controllers\PremiumSubscriptionController::class, 'toggleAutoRenewal'])->name('premium.toggle-auto-renewal');
+    // Standalone subscription settings page (parents can visit without making a payment)
+    Route::get('premium/settings', [\App\Http\Controllers\PremiumSubscriptionController::class, 'subscriptionSettings'])->name('premium.settings');
+    // Form-based auto-renewal update (non-AJAX fallback used by settings page)
+    Route::post('premium/auto-renewal', [\App\Http\Controllers\PremiumSubscriptionController::class, 'updateAutoRenewal'])->name('premium.auto-renewal.update');
 });
 
 require __DIR__ . '/auth.php';

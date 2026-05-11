@@ -70,6 +70,9 @@ class ParentDashboardController extends Controller
         $child->unique_number = 'CH' . date('Y') . str_pad($child->id, 4, '0', STR_PAD_LEFT);
         $child->save();
 
+        // Auto-start premium trial if enabled in admin settings
+        $child->startPremiumTrial();
+
         // Send Email Verification Notification
         $child->sendEmailVerificationNotification();
 

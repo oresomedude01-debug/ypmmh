@@ -25,7 +25,9 @@ class PremiumSubscriptionController extends Controller
             'premium_price_monthly', 
             'premium_price_termly', 
             'premium_price_annually', 
-            'premium_currency'
+            'premium_currency',
+            'premium_trial_enabled',
+            'trial_duration_days',
         ])->pluck('value', 'key');
 
         if ($user->hasRole('Child')) {
@@ -55,16 +57,70 @@ class PremiumSubscriptionController extends Controller
     }
 
     /**
+     * Show standalone subscription settings page (auto-renewal management).
+     * Parents can access this without making a new payment.
+     */
+    public function subscriptionSettings(Request $request)
+    {
+        $user = Auth::user();
+
+        if (!$user->hasRole('Parent')) {
+            abort(403, 'Only parents can manage subscription settings here.');
+        }
+
+        $children = $user->children;
+
+        if ($children->isEmpty()) {
+            return redirect()->route('parent.dashboard')
+                ->with('warning', 'You have no mentees listed.');
+        }
+
+        $targetChild = $request->child_id ? User::find($request->child_id) : $children->first();
+
+        if (!$targetChild || $targetChild->parent_id !== $user->id) {
+            abort(403, 'Invalid child selected.');
+        }
+
+        return view('premium.settings', compact('user', 'children', 'targetChild'));
+    }
+
+    /**
+     * Update auto-renewal via standard form POST (non-AJAX).
+     */
+    public function updateAutoRenewal(Request $request)
+    {
+        $user = Auth::user();
+        $request->validate([
+            'child_id'            => 'required|exists:users,id',
+            'auto_renewal_enabled' => 'required|in:0,1',
+        ]);
+
+        $targetUser = User::findOrFail($request->child_id);
+
+        if (!$user->hasRole('Parent') || $targetUser->parent_id !== $user->id) {
+            abort(403);
+        }
+
+        $targetUser->auto_renewal_enabled = (bool) $request->auto_renewal_enabled;
+        $targetUser->save();
+
+        $status = $targetUser->auto_renewal_enabled ? 'enabled' : 'disabled';
+        return back()->with('success', "Auto-renewal has been {$status} for {$targetUser->first_name}.");
+    }
+
+    /**
      * Handle checkout creation
      */
     public function checkout(Request $request)
     {
         $request->validate([
-            'plan' => 'required|in:monthly,termly,annually',
-            'child_id' => 'required|exists:users,id'
+            'plan'     => 'required|in:monthly,termly,annually',
+            'child_id' => 'required|exists:users,id',
+            // 'confirmed' is set by the JS modal when parent acknowledges active sub
+            'confirmed' => 'nullable|in:1',
         ]);
 
-        $user = Auth::user();
+        $user        = Auth::user();
         $targetChild = User::findOrFail($request->child_id);
 
         if ($user->hasRole('Child') && $user->id !== $targetChild->id) {
@@ -75,40 +131,52 @@ class PremiumSubscriptionController extends Controller
             abort(403);
         }
 
-        $plan = $request->plan;
-        $priceKey = 'premium_price_' . $plan;
-        
-        $price = Setting::get($priceKey, 0);
+        // If child already has an active subscription and parent has not confirmed, bounce back
+        // The view handles the confirmation modal; we double-check here as a safety net.
+        $hasActiveSub = $targetChild->premium_status === 'active'
+            && $targetChild->premium_ends_at
+            && $targetChild->premium_ends_at->isFuture();
 
-        // Premium always requires payment - no free tier
+        if ($hasActiveSub && !$request->confirmed) {
+            return back()->with('needs_confirmation', true)
+                ->with('pending_plan', $request->plan)
+                ->with('pending_child_id', $request->child_id);
+        }
+
+        $plan     = $request->plan;
+        $priceKey = 'premium_price_' . $plan;
+        $price    = Setting::get($priceKey, 0);
+
         if ($price <= 0) {
             return back()->with('error', 'Premium pricing is not configured. Please contact support.');
         }
 
-        // Create pending payment record
+        // Build a descriptive label that notes this is a stacked renewal
+        $description = 'Premium Subscription - ' . ucfirst($plan) . ' Plan';
+        if ($hasActiveSub) {
+            $description .= ' (Renewal — starts ' . $targetChild->premium_ends_at->format('M j, Y') . ')';
+        }
+
         $payment = Payment::create([
             'transaction_id' => 'PRM-' . strtoupper(Str::random(12)),
-            'user_id' => $user->id,
-            'child_id' => $targetChild->id,
-            // we have program_id which is nullable. We'll leave it null for global premium
-            'amount' => $price,
-            'currency' => Setting::get('premium_currency', 'NGN'),
-            'status' => 'pending',
+            'user_id'        => $user->id,
+            'child_id'       => $targetChild->id,
+            'amount'         => $price,
+            'currency'       => Setting::get('premium_currency', 'NGN'),
+            'status'         => 'pending',
             'payment_method' => 'paystack',
-            'description' => 'Premium Subscription - ' . ucfirst($plan) . ' Plan',
+            'description'    => $description,
         ]);
 
-        // Attach plan to session since payments table might not have 'plan' column
         session(['payment_premium_plan_' . $payment->id => $plan]);
 
-        // Get Paystack public key from settings
         $paystackPublicKey = Setting::get('paystack_public_key', '');
 
         if (!$paystackPublicKey) {
             return back()->with('error', 'Payment gateway is not fully configured.');
         }
 
-        return view('premium.checkout', compact('payment', 'paystackPublicKey', 'user', 'targetChild', 'plan'));
+        return view('premium.checkout', compact('payment', 'paystackPublicKey', 'user', 'targetChild', 'plan', 'hasActiveSub'));
     }
 
     /**
@@ -118,7 +186,7 @@ class PremiumSubscriptionController extends Controller
     {
         $request->validate([
             'payment_id' => 'required|exists:payments,id',
-            'reference' => 'required|string',
+            'reference'  => 'required|string',
         ]);
 
         $payment = Payment::findOrFail($request->payment_id);
@@ -130,34 +198,30 @@ class PremiumSubscriptionController extends Controller
         $paystackSecretKey = Setting::get('paystack_secret_key', '');
 
         try {
-            // Verify payment
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $paystackSecretKey,
-                'Content-Type' => 'application/json',
+                'Content-Type'  => 'application/json',
             ])->get('https://api.paystack.co/transaction/verify/' . $request->reference);
 
             $result = $response->json();
 
             if ($response->successful() && isset($result['status']) && $result['status'] === true) {
                 if ($result['data']['status'] === 'success') {
-                    // Payment successful
                     $payment->update([
-                        'status' => 'success',
+                        'status'            => 'success',
                         'gateway_reference' => $result['data']['reference'],
-                        'paid_at' => now(),
+                        'paid_at'           => now(),
                     ]);
 
-                    $plan = session('payment_premium_plan_' . $payment->id, 'monthly');
+                    $plan        = session('payment_premium_plan_' . $payment->id, 'monthly');
                     $targetChild = User::find($payment->child_id);
 
                     if ($targetChild) {
-                        $previousExpiryDate = $targetChild->premium_ends_at && $targetChild->premium_ends_at->isFuture() 
-                            ? $targetChild->premium_ends_at 
-                            : null;
-                        
+                        $wasRenewal = $targetChild->premium_ends_at && $targetChild->premium_ends_at->isFuture();
+
+                        // grantPremium stacks from the existing expiry automatically
                         $this->grantPremium($targetChild, $plan);
-                        
-                        // Send confirmation notification
+
                         $targetChild->notify(new \App\Notifications\SubscriptionConfirmedNotification(
                             $targetChild,
                             $plan,
@@ -166,11 +230,24 @@ class PremiumSubscriptionController extends Controller
                             $targetChild->premium_ends_at,
                             $payment->transaction_id
                         ));
-                        
-                        // If this was a renewal, also notify parent
-                        if ($previousExpiryDate && $targetChild->parent_id) {
+
+                        // Also notify the parent if different user made payment
+                        if ($targetChild->parent_id && $targetChild->parent_id !== $payment->user_id) {
                             $parent = User::find($targetChild->parent_id);
                             if ($parent) {
+                                $parent->notify(new \App\Notifications\SubscriptionConfirmedNotification(
+                                    $targetChild,
+                                    $plan,
+                                    $payment->amount,
+                                    $payment->currency,
+                                    $targetChild->premium_ends_at,
+                                    $payment->transaction_id
+                                ));
+                            }
+                        } elseif ($wasRenewal && $targetChild->parent_id) {
+                            // Parent paid — still notify for renewals
+                            $parent = User::find($targetChild->parent_id);
+                            if ($parent && $parent->id !== $payment->user_id) {
                                 $parent->notify(new \App\Notifications\SubscriptionConfirmedNotification(
                                     $targetChild,
                                     $plan,
@@ -183,13 +260,12 @@ class PremiumSubscriptionController extends Controller
                         }
                     }
 
-                    return redirect()->route('premium.success')->with('success', 'Premium subscription successful!');
+                    return redirect()->route('premium.success')->with('success', 'Premium subscription activated!');
                 }
             }
 
-            // Payment failed
             $payment->update([
-                'status' => 'failed',
+                'status'            => 'failed',
                 'gateway_reference' => $request->reference,
             ]);
 
@@ -212,13 +288,13 @@ class PremiumSubscriptionController extends Controller
     public function toggleAutoRenewal(Request $request)
     {
         $user = Auth::user();
-        
+
         if ($user->hasRole('Child')) {
             $targetUser = $user;
         } elseif ($user->hasRole('Parent')) {
-            $childId = $request->input('child_id');
+            $childId    = $request->input('child_id');
             $targetUser = User::find($childId);
-            
+
             if (!$targetUser || $targetUser->parent_id !== $user->id) {
                 return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
             }
@@ -226,39 +302,36 @@ class PremiumSubscriptionController extends Controller
             return response()->json(['success' => false, 'message' => 'Only parents and children can manage auto-renewal'], 403);
         }
 
-        if ($targetUser->premium_status !== 'active') {
-            return response()->json(['success' => false, 'message' => 'Only active subscriptions can enable auto-renewal'], 400);
-        }
-
+        // Allow toggling regardless of subscription status so parent can pre-configure preference
         $targetUser->auto_renewal_enabled = !$targetUser->auto_renewal_enabled;
         $targetUser->save();
 
         $status = $targetUser->auto_renewal_enabled ? 'enabled' : 'disabled';
-        
+
         return response()->json([
-            'success' => true,
-            'message' => "Auto-renewal has been {$status}",
+            'success'              => true,
+            'message'              => "Auto-renewal has been {$status} for {$targetUser->first_name}.",
             'auto_renewal_enabled' => $targetUser->auto_renewal_enabled,
         ]);
     }
 
-    private function grantPremium(User $child, string $plan)
+    private function grantPremium(User $child, string $plan): void
     {
         $child->premium_status = 'active';
-        $child->premium_plan = $plan;
-        $child->auto_renewal_enabled = true; // Enable auto-renewal by default
-        
-        $currentEndsAt = ($child->premium_ends_at && $child->premium_ends_at->isFuture()) 
-            ? $child->premium_ends_at 
+        $child->premium_plan   = $plan;
+
+        // Stack new subscription from the later of: existing expiry or now
+        // This ensures renewals never start simultaneously with an active sub
+        $baseDate = ($child->premium_ends_at && $child->premium_ends_at->isFuture())
+            ? $child->premium_ends_at->copy()
             : now();
 
-        if ($plan === 'monthly') {
-            $child->premium_ends_at = $currentEndsAt->addMonth();
-        } elseif ($plan === 'termly') {
-            $child->premium_ends_at = $currentEndsAt->addMonths(4);
-        } elseif ($plan === 'annually') {
-            $child->premium_ends_at = $currentEndsAt->addYear();
-        }
+        $child->premium_ends_at = match ($plan) {
+            'monthly'  => $baseDate->addMonth(),
+            'termly'   => $baseDate->addMonths(4),
+            'annually' => $baseDate->addYear(),
+            default    => $baseDate->addMonth(),
+        };
 
         $child->save();
     }

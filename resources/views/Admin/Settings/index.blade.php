@@ -391,9 +391,61 @@
                                         <option value="GBP" {{ ($settings['premium_currency'] ?? 'NGN') === 'GBP' ? 'selected' : '' }}>British Pound (£)</option>
                                     </select>
                                 </div>
-                                <div class="space-y-2">
-                                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Trial Duration (Days)</label>
-                                    <input type="number" name="trial_duration_days" value="{{ $settings['trial_duration_days'] ?? '14' }}" placeholder="14" class="w-full">
+                            </div>
+
+                            {{-- Trial Period Section --}}
+                            <div class="mb-8 p-6 rounded-3xl border-2 border-dashed border-slate-200 bg-slate-50/50 space-y-5">
+                                <h4 class="text-sm font-black text-slate-900 flex items-center gap-2">
+                                    <i class="fas fa-flask text-blue-500"></i>
+                                    Trial Period Settings
+                                </h4>
+
+                                {{-- Enable / Disable Trial Toggle --}}
+                                <div class="flex items-center justify-between gap-6 bg-white rounded-2xl p-5 border border-slate-200">
+                                    <div>
+                                        <p class="font-black text-slate-800 text-sm">Enable Free Trial</p>
+                                        <p class="text-xs text-slate-500 mt-0.5">When enabled, new children will automatically receive a trial period before needing to subscribe.</p>
+                                    </div>
+                                    {{-- Hidden inputs to submit the toggle value --}}
+                                    {{-- We use two radio-style hidden inputs toggled by JS --}}
+                                    <div class="flex items-center gap-3 shrink-0">
+                                        <span id="trialToggleLabel"
+                                            class="text-xs font-bold {{ ($settings['premium_trial_enabled'] ?? '1') == '1' ? 'text-emerald-600' : 'text-slate-400' }}">
+                                            {{ ($settings['premium_trial_enabled'] ?? '1') == '1' ? 'Enabled' : 'Disabled' }}
+                                        </span>
+                                        <input type="hidden" name="premium_trial_enabled" id="trialEnabledInput"
+                                            value="{{ ($settings['premium_trial_enabled'] ?? '1') }}">
+                                        <button type="button" id="trialToggleBtn"
+                                            onclick="toggleTrialEnabled()"
+                                            class="relative inline-flex h-8 w-14 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-300
+                                                {{ ($settings['premium_trial_enabled'] ?? '1') == '1' ? 'bg-emerald-500' : 'bg-slate-200' }}"
+                                            role="switch"
+                                            aria-checked="{{ ($settings['premium_trial_enabled'] ?? '1') == '1' ? 'true' : 'false' }}">
+                                            <span class="sr-only">Enable Trial</span>
+                                            <span id="trialToggleThumb"
+                                                class="pointer-events-none inline-block h-7 w-7 transform rounded-full bg-white shadow-lg ring-0 transition duration-300
+                                                    {{ ($settings['premium_trial_enabled'] ?? '1') == '1' ? 'translate-x-6' : 'translate-x-0' }}">
+                                            </span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {{-- Trial Duration (only editable when trial is enabled) --}}
+                                <div id="trialDurationBlock" class="{{ ($settings['premium_trial_enabled'] ?? '1') == '1' ? '' : 'opacity-40 pointer-events-none' }} transition-all">
+                                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block">Trial Duration (Days)</label>
+                                    <div class="flex items-center gap-3">
+                                        <input type="number" name="trial_duration_days"
+                                            id="trialDurationInput"
+                                            value="{{ $settings['trial_duration_days'] ?? '14' }}"
+                                            min="1" max="365"
+                                            placeholder="14"
+                                            class="w-full max-w-xs"
+                                            {{ ($settings['premium_trial_enabled'] ?? '1') == '1' ? '' : 'disabled' }}>
+                                        <span class="text-sm text-slate-500 font-medium">days of free access</span>
+                                    </div>
+                                    <p class="text-xs text-slate-400 mt-2">
+                                        Children will have <strong>{{ $settings['trial_duration_days'] ?? '14' }} days</strong> of free premium access upon registration.
+                                    </p>
                                 </div>
                             </div>
 
@@ -416,14 +468,16 @@
                             <div class="mt-8 p-6 bg-yellow-50 rounded-3xl border border-yellow-200 flex items-start gap-4">
                                 <i class="fas fa-info-circle text-yellow-600 mt-1"></i>
                                 <div class="text-xs text-slate-700 leading-relaxed">
-                                    <strong>How Auto-Billing Works:</strong> These prices dictate the checkout amount. Both Parents and Children (above 16) can subscribe to bypass the gate on "Rolling" auto-assigned programmes. Setup zero (0) to make it conditionally free.
+                                    <strong>How Subscriptions Work:</strong> Parents can subscribe for their children using the plans above.
+                                    If a child already has an active subscription, new payments are <strong>stacked</strong> — they start counting only after the existing one expires.
+                                    Auto-renewal reminders are sent automatically if enabled by the parent. Set price to 0 to make a tier free.
                                 </div>
                             </div>
                         </div>
 
                         <div class="flex justify-end pt-4">
                             <button type="submit" class="px-8 py-4 bg-yellow-500 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-yellow-600 transition-all shadow-xl shadow-yellow-500/20">
-                                Save Subscriptions
+                                Save Subscription Settings
                             </button>
                         </div>
                     </form>
@@ -674,6 +728,38 @@
             }).catch(() => {
                 showToast('Failed to copy URL. Please copy manually.', 'error');
             });
+        }
+
+        // Trial enable/disable toggle
+        function toggleTrialEnabled() {
+            const input     = document.getElementById('trialEnabledInput');
+            const btn       = document.getElementById('trialToggleBtn');
+            const thumb     = document.getElementById('trialToggleThumb');
+            const label     = document.getElementById('trialToggleLabel');
+            const block     = document.getElementById('trialDurationBlock');
+            const durationInput = document.getElementById('trialDurationInput');
+
+            const isEnabled = input.value === '1';
+            const newVal    = isEnabled ? '0' : '1';
+
+            input.value = newVal;
+            btn.setAttribute('aria-checked', newVal === '1' ? 'true' : 'false');
+
+            if (newVal === '1') {
+                btn.classList.replace('bg-slate-200', 'bg-emerald-500');
+                thumb.classList.replace('translate-x-0', 'translate-x-6');
+                label.className = 'text-xs font-bold text-emerald-600';
+                label.textContent = 'Enabled';
+                block.classList.remove('opacity-40', 'pointer-events-none');
+                durationInput.disabled = false;
+            } else {
+                btn.classList.replace('bg-emerald-500', 'bg-slate-200');
+                thumb.classList.replace('translate-x-6', 'translate-x-0');
+                label.className = 'text-xs font-bold text-slate-400';
+                label.textContent = 'Disabled';
+                block.classList.add('opacity-40', 'pointer-events-none');
+                durationInput.disabled = true;
+            }
         }
     </script>
 @endsection

@@ -87,11 +87,12 @@ class SettingsController extends Controller
             'social_youtube' => 'nullable|url|max:255',
             'social_linkedin' => 'nullable|url|max:255',
             // Premium Subscription Settings
-            'premium_price_monthly' => 'nullable|numeric|min:0',
-            'premium_price_termly' => 'nullable|numeric|min:0',
-            'premium_price_annually' => 'nullable|numeric|min:0',
-            'premium_currency' => 'nullable|string|max:10',
-            'trial_duration_days' => 'nullable|integer|min:0',
+            'premium_price_monthly'   => 'nullable|numeric|min:0',
+            'premium_price_termly'    => 'nullable|numeric|min:0',
+            'premium_price_annually'  => 'nullable|numeric|min:0',
+            'premium_currency'        => 'nullable|string|max:10',
+            'premium_trial_enabled'   => 'nullable|in:0,1',
+            'trial_duration_days'     => 'nullable|integer|min:0',
         ]);
 
         $keys = [
@@ -117,6 +118,7 @@ class SettingsController extends Controller
             'premium_price_termly',
             'premium_price_annually',
             'premium_currency',
+            'premium_trial_enabled',
             'trial_duration_days',
         ];
 

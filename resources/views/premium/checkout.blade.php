@@ -1,4 +1,4 @@
-@extends('layouts.frontend')
+@extends('layouts.dashboard')
 
 @section('title', 'Complete Premium Payment')
 
@@ -49,6 +49,21 @@
                     </p>
                 </div>
 
+                @if($hasActiveSub ?? false)
+                <div class="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-3">
+                    <i class="fas fa-layer-group text-amber-500 mt-0.5 shrink-0"></i>
+                    <div>
+                        <p class="text-xs font-black text-amber-800">Subscription Will Be Stacked</p>
+                        <p class="text-xs text-amber-700 mt-0.5 leading-relaxed">
+                            {{ $targetChild->first_name }} already has an active subscription until
+                            <strong>{{ $targetChild->premium_ends_at?->format('M j, Y') }}</strong>.
+                            This new <strong>{{ ucfirst($plan) }}</strong> plan will begin from that date —
+                            no existing access is lost.
+                        </p>
+                    </div>
+                </div>
+                @endif
+
                 <button type="button" id="paystack-btn" class="w-full py-4 bg-gradient-to-r from-[#0B4D73] to-blue-600 text-white font-black uppercase tracking-widest text-[10px] rounded-2xl shadow-lg shadow-blue-900/20 hover:shadow-blue-900/40 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2">
                     <i class="fas fa-lock"></i>
                     <span id="pay-btn-text">Pay {{ \App\Models\Setting::get('premium_currency', 'NGN') }}{{ number_format($payment->amount, 2) }} Now</span>
@@ -59,6 +74,7 @@
                 </a>
             </div>
         </div>
+
 
         <div class="text-center mt-6">
             <span class="opacity-30 inline-block grayscale"><img src="https://website-v3-assets.s3.amazonaws.com/assets/img/hero/Paystack-mark-white-twitter.png" alt="Paystack" class="h-6 mx-auto bg-slate-800 rounded px-2"></span>

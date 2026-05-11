@@ -137,9 +137,14 @@
                     <span class="font-medium">Program Catalog</span>
                 </a>
                 <a href="{{ route('premium.subscribe') }}"
-                    class="menu-item {{ request()->routeIs('premium.*') ? 'active' : 'glass-hover' }} flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-all">
+                    class="menu-item {{ request()->routeIs('premium.subscribe') || request()->routeIs('premium.checkout') || request()->routeIs('premium.success') ? 'active' : 'glass-hover' }} flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-all">
                     <i class="fas fa-crown w-5 text-yellow-500"></i>
                     <span class="font-bold text-yellow-700">Premium Subscriptions</span>
+                </a>
+                <a href="{{ route('premium.settings') }}"
+                    class="menu-item {{ request()->routeIs('premium.settings') ? 'active' : 'glass-hover' }} flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-all">
+                    <i class="fas fa-sync-alt w-5 text-blue-500"></i>
+                    <span class="font-medium">Subscription Settings</span>
                 </a>
                 <a href="{{ route('parent.observations') }}"
                     class="menu-item {{ request()->routeIs('parent.observations') ? 'active' : 'glass-hover' }} flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-all">

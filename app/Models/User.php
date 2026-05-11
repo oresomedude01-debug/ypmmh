@@ -38,6 +38,12 @@ class User extends Authenticatable implements MustVerifyEmail
         'unique_number',
         'phone_number',
         'relationship',
+        'auto_renewal_enabled',
+        'premium_status',
+        'premium_plan',
+        'premium_ends_at',
+        'trial_ends_at',
+        'must_change_password',
     ];
 
     /**
@@ -336,14 +342,26 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Start a trial for this child based on settings
+     * Start a trial for this child — only if the admin has enabled trials.
+     * Returns true if trial was started, false if trials are disabled.
      */
-    public function startPremiumTrial()
+    public function startPremiumTrial(): bool
     {
-        $trialDays = (int) (\App\Models\Setting::where('key', 'trial_duration_days')->value('value') ?? 14);
-        
+        // Respect the admin toggle
+        $trialEnabled = \App\Models\Setting::get('premium_trial_enabled', '1');
+        if (!$trialEnabled || $trialEnabled === '0') {
+            return false;
+        }
+
+        $trialDays = (int) (\App\Models\Setting::get('trial_duration_days', 14));
+        if ($trialDays <= 0) {
+            return false;
+        }
+
         $this->premium_status = 'trial';
-        $this->trial_ends_at = now()->addDays($trialDays);
+        $this->trial_ends_at  = now()->addDays($trialDays);
         $this->save();
+
+        return true;
     }
 }
