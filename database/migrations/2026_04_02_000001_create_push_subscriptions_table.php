@@ -11,12 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Only create the table if it doesn't already exist
+        if (Schema::hasTable('push_subscriptions')) {
+            return;
+        }
+        
         Schema::create('push_subscriptions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             
             // Web Push Protocol (subscription details)
-            $table->text('endpoint'); // The push server endpoint
+            $table->string('endpoint'); // The push server endpoint
             $table->text('public_key'); // VAPID public key
             $table->text('auth_token'); // Authentication token for the subscription
             $table->text('p256dh'); // Encryption key
