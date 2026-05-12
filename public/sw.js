@@ -212,10 +212,12 @@ function isNavigationRequest(request) {
 function isExcludedPath(pathname) {
     return [
         '/api/', '/login', '/register', '/logout', '/password',
+        '/admin', '/mentor', '/parent', '/child',
         '/sanctum/', '/broadcasting/', '/webhooks/',
         '/_debugbar/', '/telescope/', '/horizon/', '/livewire/',
     ].some(path => pathname.startsWith(path));
 }
+
 
 async function trimCache(cacheName, maxItems) {
     const cache = await caches.open(cacheName);
