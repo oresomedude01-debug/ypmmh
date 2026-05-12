@@ -30,7 +30,9 @@ class ChildWelcomeMail extends Mailable implements ShouldQueue
     public function __construct(
         public User $child,
         public User $parent,
+        public string $verificationUrl,
     ) {}
+
 
     /**
      * Get the message envelope.
@@ -52,8 +54,10 @@ class ChildWelcomeMail extends Mailable implements ShouldQueue
             with: [
                 'child'  => $this->child,
                 'parent' => $this->parent,
+                'url'    => $this->verificationUrl,
             ],
         );
+
     }
 
     /**

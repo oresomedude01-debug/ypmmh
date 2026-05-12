@@ -448,4 +448,69 @@
     </div>
 </div>
 @endif
+
+{{-- New Child Created Success Modal --}}
+@if(session('new_child_created'))
+<div id="childSuccessModal" class="fixed inset-0 z-[10000] flex items-center justify-center p-4" style="background: rgba(0,0,0,0.7); backdrop-filter: blur(10px);">
+    <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden animate-auth relative border border-white/20">
+        <!-- Brand Background -->
+        <div class="bg-gradient-to-br from-emerald-600 to-teal-800 p-8 text-center text-white relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full blur-3xl -mr-16 -mt-16"></div>
+            <div class="relative z-10">
+                <div class="w-20 h-20 mx-auto bg-white/10 backdrop-blur-md rounded-3xl flex items-center justify-center mb-5 border border-white/20">
+                    <i class="fas fa-child-reaching text-4xl text-emerald-200"></i>
+                </div>
+                <h2 class="text-2xl font-black mb-2 tracking-tight">{{ session('child_name') }} Added! 🎉</h2>
+                <p class="text-emerald-100/80 text-sm font-medium">Account created successfully</p>
+            </div>
+        </div>
+
+        <div class="p-8">
+            <div class="space-y-6 mb-8">
+                <div class="p-5 bg-emerald-50 rounded-2xl border border-emerald-100">
+                    <p class="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-3">Temporary Login Details</p>
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-slate-500 font-medium">Email:</span>
+                            <span class="font-black text-slate-900">{{ session('child_email') }}</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-slate-500 font-medium">Password:</span>
+                            <span class="font-black text-slate-900 px-2 py-0.5 bg-white rounded-md border border-emerald-200">{{ session('child_password') }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-start gap-4 p-5 bg-amber-50 rounded-2xl border border-amber-100">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-sm">
+                        <i class="fas fa-envelope-open-text text-sm"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-black text-amber-800 uppercase tracking-wider mb-1">Important Next Step</p>
+                        <p class="text-[11px] text-amber-700/80 font-medium leading-relaxed">
+                            A confirmation link has been sent to <strong>{{ session('child_email') }}</strong>. Please ask {{ session('child_name') }} to check their <strong>Inbox and Spam folder</strong> to verify their account and set their own private password.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="closeChildSuccessModal()" class="w-full py-4 bg-[#0B4D73] text-white font-black uppercase tracking-widest text-[10px] rounded-2xl hover:bg-slate-900 transition-all shadow-lg active:scale-95">
+                Got it, Thanks!
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function closeChildSuccessModal() {
+        const modal = document.getElementById('childSuccessModal');
+        if (modal) {
+            modal.style.opacity = '0';
+            modal.style.transition = 'opacity 0.3s ease';
+            setTimeout(() => modal.remove(), 300);
+        }
+    }
+</script>
+@endif
 @endsection
+

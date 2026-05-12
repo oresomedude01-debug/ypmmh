@@ -114,17 +114,17 @@
                 </div>
 
                 <div style="text-align: center;">
-                    <a href="{{ route('login') }}" class="btn">Log In Now</a>
+                    <a href="{{ $url }}" class="btn">Verify & Set Password</a>
                 </div>
+                <p style="font-size: 14px; color: #666;">
+                    If the button doesn't work, you can copy and paste this link into your browser:<br>
+                    <span style="word-break: break-all; color: #0B4D73;">{{ $url }}</span>
+                </p>
             </div>
 
             <div class="footer">
-                <p style="margin: 0 0 10px 0;">
-                    If you didn't expect this invitation, please ignore this email.
-                </p>
-                <p style="margin: 0;">
-                    © {{ date('Y') }} {{ config('app.name', 'YPMMH') }}. All rights reserved.
-                </p>
+                <p>&copy; {{ date('Y') }} {{ config('app.name') }}. All rights reserved.</p>
+                <p>If you didn't expect this email, please contact our support team.</p>
             </div>
         </div>
     </div>

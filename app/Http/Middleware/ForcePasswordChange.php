@@ -17,10 +17,14 @@ class ForcePasswordChange
     {
         if (auth()->check() && auth()->user()->must_change_password) {
             // Prevent redirect loops
-            if (!$request->is('password/change') && !$request->is('logout')) {
+            if (!$request->is('password/change') && !$request->is('child/set-password') && !$request->is('logout')) {
+                if (auth()->user()->hasRole('Child')) {
+                    return redirect()->route('child.set-password');
+                }
                 return redirect()->route('password.change.notice');
             }
         }
+
 
         return $next($request);
     }

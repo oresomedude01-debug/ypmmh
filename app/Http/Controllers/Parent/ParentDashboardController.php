@@ -47,17 +47,18 @@ class ParentDashboardController extends Controller
             'profile_picture' => 'nullable|image|max:2048',
         ]);
 
+        $defaultPassword = 'password123';
         $childData = [
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
             'date_of_birth' => $request->date_of_birth,
             'gender' => $request->gender,
             'email' => $request->email,
-            'password' => Hash::make(Str::random(32)), // Random unset password
+            'password' => Hash::make($defaultPassword),
             'parent_id' => Auth::id(),
             'relationship' => $request->relationship,
             'must_change_password' => true,
-            'email_verified_at' => null, // Not yet verified
+            'email_verified_at' => null,
         ];
 
         if ($request->hasFile('profile_picture')) {
@@ -75,11 +76,25 @@ class ParentDashboardController extends Controller
         // Auto-start premium trial if enabled in admin settings
         $child->startPremiumTrial();
 
-        // Send Email Verification Notification
-        $child->sendEmailVerificationNotification();
+        // Create a temporary signed URL for verification and password setup
+        $verificationUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+            'verification.verify',
+            now()->addDays(3),
+            ['id' => $child->id, 'hash' => sha1($child->email)]
+        );
 
-        return redirect()->route('parent.dashboard')->with('success', $child->first_name . ' has been added to your family. A verification email has been sent to ' . $child->email . '.');
+        // Send Custom Welcome Email with the verification link
+        \Illuminate\Support\Facades\Mail::to($child->email)->send(new \App\Mail\ChildWelcomeMail($child, Auth::user(), $verificationUrl));
+
+        return redirect()->route('parent.dashboard')->with([
+            'success' => $child->first_name . ' has been added successfully.',
+            'new_child_created' => true,
+            'child_name' => $child->first_name,
+            'child_email' => $child->email,
+            'child_password' => $defaultPassword
+        ]);
     }
+
 
     public function reportProfileIssue(Request $request, User $child)
     {
