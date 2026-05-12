@@ -110,6 +110,24 @@
           class="absolute -right-4 -bottom-4 w-16 h-16 sm:w-24 sm:h-24 bg-purple-500/5 rounded-full group-hover:scale-125 transition-transform">
         </div>
       </div>
+
+      <!-- Deleted Users (New) -->
+      <div class="admin-card p-4 sm:p-6 relative overflow-hidden group border-l-4 border-l-red-500">
+        <div class="relative z-10">
+          <div class="flex items-center justify-between mb-2 sm:mb-4">
+            <div
+              class="w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center text-sm sm:text-xl shadow-sm group-hover:scale-110 transition-transform">
+              <i class="fas fa-user-slash"></i>
+            </div>
+          </div>
+          <p class="text-[8px] sm:text-[10px] font-black uppercase tracking-widest mb-0.5 sm:mb-1 truncate"
+            style="color: var(--text-secondary);">Trash Bin</p>
+          <h3 class="text-xl sm:text-3xl font-black text-red-600">{{ $stats['deletedCount'] ?? 0 }}</h3>
+        </div>
+        <div
+          class="absolute -right-4 -bottom-4 w-16 h-16 sm:w-24 sm:h-24 bg-red-500/5 rounded-full group-hover:scale-125 transition-transform">
+        </div>
+      </div>
     </div>
 
     <!-- Filters & Search -->
@@ -141,6 +159,7 @@
             <option value="Mentor" {{ request('role') == 'Mentor' ? 'selected' : '' }}>Mentor</option>
             <option value="Parent" {{ request('role') == 'Parent' ? 'selected' : '' }}>Parent</option>
             <option value="Child" {{ request('role') == 'Child' ? 'selected' : '' }}>Child</option>
+            <option value="deleted" {{ request('status') == 'deleted' ? 'selected' : '' }}>Deleted/Trashed</option>
           </select>
         </div>
 
@@ -214,8 +233,13 @@
                       {{ $roleName }}
                     </span>
                   </td>
-                  <td class="px-6 py-4" style="background-color: transparent;">
-                    @if($user->email_verified_at)
+                    <td class="px-6 py-4" style="background-color: transparent;">
+                    @if($user->trashed())
+                      <span
+                        class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-red-500/10 text-red-500">
+                        <i class="fas fa-trash-alt"></i> Deleted
+                      </span>
+                    @elseif($user->email_verified_at)
                       <span
                         class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-500/10 text-emerald-500">
                         <i class="fas fa-check-circle"></i> Verified
@@ -233,20 +257,42 @@
                   </td>
                   <td class="px-6 py-4 text-right" style="background-color: transparent;">
                     <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <a href="{{ route('admin.users.edit', $user) }}"
-                        class="p-2 bg-blue-500/10 text-blue-500 rounded-lg hover:bg-blue-500/20 transition-all" title="Edit">
-                        <i class="fas fa-edit"></i>
-                      </a>
-                      <form action="{{ route('admin.users.destroy', $user) }}" method="POST"
-                        onsubmit="return confirm('Are you sure?');" class="inline">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit"
-                          class="p-2 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500/20 transition-all font-black"
-                          title="Delete">
-                          <i class="fas fa-trash-alt"></i>
-                        </button>
-                      </form>
+                      @if($user->trashed())
+                        <form action="{{ route('admin.users.restore', $user->id) }}" method="POST" class="inline">
+                          @csrf
+                          @method('PATCH')
+                          <button type="submit"
+                            class="p-2 bg-emerald-500/10 text-emerald-500 rounded-lg hover:bg-emerald-500/20 transition-all font-black"
+                            title="Restore">
+                            <i class="fas fa-undo-alt"></i>
+                          </button>
+                        </form>
+                        <form action="{{ route('admin.users.force-delete', $user->id) }}" method="POST"
+                          onsubmit="return confirm('PERMANENTLY delete this user? This cannot be undone.');" class="inline">
+                          @csrf
+                          @method('DELETE')
+                          <button type="submit"
+                            class="p-2 bg-red-600/20 text-red-600 rounded-lg hover:bg-red-600/30 transition-all font-black border border-red-600/30"
+                            title="Permanent Delete">
+                            <i class="fas fa-skull"></i>
+                          </button>
+                        </form>
+                      @else
+                        <a href="{{ route('admin.users.edit', $user) }}"
+                          class="p-2 bg-blue-500/10 text-blue-500 rounded-lg hover:bg-blue-500/20 transition-all" title="Edit">
+                          <i class="fas fa-edit"></i>
+                        </a>
+                        <form action="{{ route('admin.users.destroy', $user) }}" method="POST"
+                          onsubmit="return confirm('Are you sure you want to soft-delete this user?');" class="inline">
+                          @csrf
+                          @method('DELETE')
+                          <button type="submit"
+                            class="p-2 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500/20 transition-all font-black"
+                            title="Delete">
+                            <i class="fas fa-trash-alt"></i>
+                          </button>
+                        </form>
+                      @endif
                     </div>
                   </td>
                 </tr>

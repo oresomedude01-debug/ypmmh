@@ -42,7 +42,14 @@ class UserController extends Controller
                 $query->whereNotNull('email_verified_at');
             } elseif ($request->status === 'pending') {
                 $query->whereNull('email_verified_at');
+            } elseif ($request->status === 'deleted') {
+                $query->onlyTrashed();
             }
+        }
+
+        // Include trashed users if specified
+        if ($request->has('include_deleted')) {
+            $query->withTrashed();
         }
 
         $users = $query->latest()->paginate(15);
@@ -56,6 +63,7 @@ class UserController extends Controller
             'childCount' => User::role('Child')->count(),
             'verifiedCount' => User::whereNotNull('email_verified_at')->count(),
             'pendingCount' => User::whereNull('email_verified_at')->count(),
+            'deletedCount' => User::onlyTrashed()->count(),
         ];
 
         return view('Admin/Users/index', [
@@ -267,7 +275,31 @@ class UserController extends Controller
         $user->delete();
 
         return redirect()->route('admin.users.index')
-            ->with('success', 'User deleted successfully.');
+            ->with('success', 'User soft-deleted successfully.');
+    }
+
+    /**
+     * Restore the specified user from storage.
+     */
+    public function restore($id)
+    {
+        $user = User::withTrashed()->findOrFail($id);
+        $user->restore();
+
+        return redirect()->route('admin.users.index')
+            ->with('success', 'User restored successfully.');
+    }
+
+    /**
+     * Permanently remove the specified user from storage.
+     */
+    public function forceDelete($id)
+    {
+        $user = User::withTrashed()->findOrFail($id);
+        $user->forceDelete();
+
+        return redirect()->route('admin.users.index')
+            ->with('success', 'User permanently deleted.');
     }
 
     /**

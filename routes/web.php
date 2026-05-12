@@ -213,6 +213,8 @@ Route::middleware(['auth', 'ensure_active', 'force_password_change'])->group(fun
         Route::resource('gallery', \App\Http\Controllers\Admin\GalleryController::class);
 
         Route::resource('users', AdminUserController::class);
+        Route::patch('users/{id}/restore', [AdminUserController::class, 'restore'])->name('users.restore');
+        Route::delete('users/{id}/force-delete', [AdminUserController::class, 'forceDelete'])->name('users.force-delete');
         Route::get('users/export/csv', [AdminUserController::class, 'export'])->name('users.export');
         Route::get('users/template/csv', [AdminUserController::class, 'downloadTemplate'])->name('users.template');
         Route::post('users/import/csv', [AdminUserController::class, 'import'])->name('users.import');
