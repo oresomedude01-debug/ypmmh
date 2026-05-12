@@ -16,11 +16,11 @@
             <form action="{{ route('password.store') }}" method="POST" class="space-y-6">
                 @csrf
 
-                <input type="hidden" name="token" value="{{ $request->route('token') }}">
+                <input type="hidden" name="token" value="{{ $token }}">
 
                 <!-- Email Input -->
                 <div class="form-group">
-                    <input type="email" id="email" name="email" class="form-input" placeholder=" " value="{{ old('email', $request->email) }}" required autofocus>
+                    <input type="email" id="email" name="email" class="form-input" placeholder=" " value="{{ old('email', $email) }}" required autofocus>
                     <label for="email" class="form-label">Email Address</label>
                     @error('email')
                         <p class="text-red-500 text-xs mt-2 font-semibold"><i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}</p>
