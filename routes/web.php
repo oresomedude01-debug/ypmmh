@@ -254,6 +254,7 @@ Route::middleware(['auth', 'ensure_active', 'force_password_change'])->group(fun
         // Program Community Chat
         Route::get('programs/{program}/chat/messages', [\App\Http\Controllers\ProgramChatController::class, 'fetchMessages'])->name('programs.chat.messages');
         Route::post('programs/{program}/chat/messages', [\App\Http\Controllers\ProgramChatController::class, 'sendMessage'])->middleware(\App\Http\Middleware\EnsureNotChatSuspended::class)->name('programs.chat.send');
+        Route::post('programs/{program}/chat/messages/{message}/react', [\App\Http\Controllers\ProgramChatController::class, 'toggleReaction'])->name('programs.chat.messages.react');
         Route::delete('chat/messages/{message}', [\App\Http\Controllers\ProgramChatController::class, 'deleteMessage'])->name('chat.messages.destroy');
         Route::post('programs/{program}/chat/members/{user}/toggle-suspension', [\App\Http\Controllers\ProgramChatController::class, 'toggleSuspension'])->name('programs.chat.members.toggle-suspension');
 
@@ -299,6 +300,7 @@ Route::middleware(['auth', 'ensure_active', 'force_password_change'])->group(fun
         // Program Community Chat
         Route::get('programs/{program}/chat/messages', [\App\Http\Controllers\ProgramChatController::class, 'fetchMessages'])->name('programs.chat.messages');
         Route::post('programs/{program}/chat/messages', [\App\Http\Controllers\ProgramChatController::class, 'sendMessage'])->middleware(\App\Http\Middleware\EnsureNotChatSuspended::class)->name('programs.chat.send');
+        Route::post('programs/{program}/chat/messages/{message}/react', [\App\Http\Controllers\ProgramChatController::class, 'toggleReaction'])->name('programs.chat.messages.react');
         Route::delete('chat/messages/{message}', [\App\Http\Controllers\ProgramChatController::class, 'deleteMessage'])->name('chat.messages.destroy');
         Route::post('programs/{program}/chat/members/{user}/toggle-suspension', [\App\Http\Controllers\ProgramChatController::class, 'toggleSuspension'])->name('programs.chat.members.toggle-suspension');
 
@@ -372,6 +374,7 @@ Route::middleware(['auth', 'ensure_active', 'force_password_change'])->group(fun
         Route::post('lessons/{lesson}/complete', [ChildDashboardController::class, 'completeLesson'])->name('lessons.complete');
         Route::get('programs/{program}/chat/messages', [\App\Http\Controllers\ProgramChatController::class, 'fetchMessages'])->name('programs.chat.messages');
         Route::post('programs/{program}/chat/messages', [\App\Http\Controllers\ProgramChatController::class, 'sendMessage'])->middleware(\App\Http\Middleware\EnsureNotChatSuspended::class)->name('programs.chat.send');
+        Route::post('programs/{program}/chat/messages/{message}/react', [\App\Http\Controllers\ProgramChatController::class, 'toggleReaction'])->name('programs.chat.messages.react');
         Route::delete('chat/messages/{message}', [\App\Http\Controllers\ProgramChatController::class, 'deleteMessage'])->name('chat.messages.destroy');
 
         // Achievements
