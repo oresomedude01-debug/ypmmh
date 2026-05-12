@@ -148,9 +148,10 @@ Route::middleware(['auth', 'ensure_active', 'force_password_change'])->group(fun
             'latest' => $latest ? [
                 'id'      => $latest->id,
                 'data'    => [
-                    'message' => $latest->data['message'] ?? 'You have a new notification.',
-                    'type'    => $latest->data['type']   ?? 'info',
-                    'icon'    => $latest->data['icon']   ?? 'fas fa-bell',
+                    'message'    => $latest->data['message']    ?? 'You have a new notification.',
+                    'type'       => $latest->data['type']       ?? 'info',
+                    'icon'       => $latest->data['icon']       ?? 'fas fa-bell',
+                    'program_id' => $latest->data['program_id'] ?? null,
                 ],
                 'created_at' => $latest->created_at->diffForHumans(),
             ] : null,

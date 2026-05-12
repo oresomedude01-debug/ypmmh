@@ -967,108 +967,181 @@
         });
     </script>
 
-    {{-- Toast Container for "Push" Notifications --}}
+    {{-- Toast Container for notifications --}}
     <div id="toast-container" class="fixed bottom-20 md:bottom-6 right-6 z-[200] space-y-3 pointer-events-none"></div>
 
+    @php
+        // Role-based chat community URL prefix (used by JS to build the chat room link)
+        $chatNotifBaseUrl = '/child/communities/';
+        if (auth()->user()->hasRole('Admin'))  $chatNotifBaseUrl = '/admin/communities/';
+        elseif (auth()->user()->hasRole('Mentor')) $chatNotifBaseUrl = '/mentor/communities/';
+    @endphp
+
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            let lastNotificationId = null;
-            let initialLoad = true;
+    (function () {
+        'use strict';
 
-            function checkNotifications() {
-                fetch('{{ route('api.notifications.unread') }}', {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Accept': 'application/json',
+        // ── Config ────────────────────────────────────────────────────────────
+        const NOTIF_POLL_URL  = '{{ route('api.notifications.unread') }}';
+        const CHAT_BASE_URL   = @json($chatNotifBaseUrl);  // e.g. '/child/communities/'
+        const POLL_INTERVAL   = 15000; // ms
+
+        // ── State ─────────────────────────────────────────────────────────────
+        let lastNotificationId = null;
+        let initialLoad        = true;
+
+        // ── Browser push permission helper ────────────────────────────────────
+        /**
+         * Fire an OS-level browser notification via the registered Service Worker.
+         * Falls back to plain Notification API if the SW is not yet active.
+         * Only fires if Notification.permission === 'granted'.
+         */
+        function showBrowserChatNotification(message, programId) {
+            if (!('Notification' in window)) return;
+            if (Notification.permission !== 'granted') return;
+
+            const chatUrl = window.location.origin + CHAT_BASE_URL + programId;
+
+            // Prefer SW-based notification (persists even when tab is hidden)
+            if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                navigator.serviceWorker.controller.postMessage({
+                    type:      'SHOW_CHAT_NOTIFICATION',
+                    title:     '💬 New Community Message',
+                    body:      message,
+                    programId: programId,
+                    url:       chatUrl,
+                });
+            } else {
+                // Fallback: basic Notification API
+                try {
+                    const n = new Notification('💬 New Community Message', {
+                        body:  message,
+                        icon:  '/icons/icon-192x192.png',
+                        badge: '/icons/icon-72x72.png',
+                        tag:   'chat-program-' + programId,
+                    });
+                    n.onclick = () => { window.focus(); window.location.href = chatUrl; };
+                } catch (e) { /* Some browsers block plain Notification outside gesture */ }
+            }
+        }
+
+        // ── Notification poll ─────────────────────────────────────────────────
+        function checkNotifications() {
+            fetch(NOTIF_POLL_URL, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept':           'application/json',
+                }
+            })
+            .then(r => r.json())
+            .then(data => {
+
+                // Update bell-badge counters on nav
+                document.querySelectorAll('[data-notification-badge]').forEach(badge => {
+                    if (data.unread_count > 0) {
+                        badge.textContent = data.unread_count > 9 ? '9+' : data.unread_count;
+                        badge.classList.remove('hidden');
+                    } else {
+                        badge.classList.add('hidden');
                     }
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        // Update bell badge counters (add data-notification-badge to bell icons)
-                        document.querySelectorAll('[data-notification-badge]').forEach(badge => {
-                            if (data.unread_count > 0) {
-                                badge.textContent = data.unread_count > 9 ? '9+' : data.unread_count;
-                                badge.classList.remove('hidden');
-                            } else {
-                                badge.classList.add('hidden');
-                            }
-                        });
+                });
 
-                        if (data.unread_count > 0 && data.latest) {
-                            if (lastNotificationId !== data.latest.id) {
-                                lastNotificationId = data.latest.id;
+                if (data.unread_count > 0 && data.latest) {
+                    const isNew = lastNotificationId !== data.latest.id;
 
-                                // Only show toast for NEW notifications after initial page load
-                                if (!initialLoad) {
-                                    const n = data.latest.data;
-                                    showNotificationToast(
-                                        n.message || 'You have a new notification.',
-                                        n.type    || 'info',
-                                        n.icon    || 'fas fa-bell'
-                                    );
+                    if (isNew) {
+                        lastNotificationId = data.latest.id;
+
+                        // Only act on truly NEW notifications (skip on first page-load)
+                        if (!initialLoad) {
+                            const n = data.latest.data;
+
+                            // Always show in-app toast
+                            showNotificationToast(
+                                n.message || 'You have a new notification.',
+                                n.type    || 'info',
+                                n.icon    || 'fas fa-bell'
+                            );
+
+                            // ── Browser push for CHAT messages ──────────────
+                            // Only fire if the user is NOT already on that chat page.
+                            if (n.type === 'chat' && n.program_id) {
+                                const currentChatId = window.currentChatProgramId || null;
+                                const alreadyThere  = currentChatId &&
+                                    String(currentChatId) === String(n.program_id);
+
+                                if (!alreadyThere) {
+                                    showBrowserChatNotification(n.message, n.program_id);
                                 }
                             }
                         }
-                        initialLoad = false;
-                    })
-                    .catch(error => console.error('Error fetching notifications:', error));
-            }
+                    }
+                }
 
-            function showNotificationToast(message, type = 'info', iconClass = 'fas fa-bell') {
-                const container = document.getElementById('toast-container');
-                if (!container) return;
+                initialLoad = false;
+            })
+            .catch(err => console.error('[YPMMH] Notification poll error:', err));
+        }
 
-                const toast = document.createElement('div');
+        // ── In-app Toast ─────────────────────────────────────────────────────
+        function showNotificationToast(message, type = 'info', iconClass = 'fas fa-bell') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
 
-                // Contextual accent per notification type
-                const colorMap = {
-                    'new_user_registration': ['bg-blue-50',    'text-blue-500',    'border-blue-100'   ],
-                    'new_program_available': ['bg-emerald-50', 'text-emerald-500', 'border-emerald-100' ],
-                    'blog_published':        ['bg-purple-50',  'text-purple-500',  'border-purple-100'  ],
-                    'new_blog_post':         ['bg-indigo-50',  'text-indigo-500',  'border-indigo-100'  ],
-                    'birthday':              ['bg-pink-50',    'text-pink-500',    'border-pink-100'    ],
-                    'report':               ['bg-amber-50',   'text-amber-500',   'border-amber-100'   ],
-                    'program_update':        ['bg-teal-50',    'text-teal-500',    'border-teal-100'    ],
-                };
+            const colorMap = {
+                'new_user_registration': ['bg-blue-50',    'text-blue-500',    'border-blue-100'   ],
+                'new_program_available': ['bg-emerald-50', 'text-emerald-500', 'border-emerald-100' ],
+                'blog_published':        ['bg-purple-50',  'text-purple-500',  'border-purple-100'  ],
+                'new_blog_post':         ['bg-indigo-50',  'text-indigo-500',  'border-indigo-100'  ],
+                'birthday':              ['bg-pink-50',    'text-pink-500',    'border-pink-100'    ],
+                'report':                ['bg-amber-50',   'text-amber-500',   'border-amber-100'   ],
+                'program_update':        ['bg-teal-50',    'text-teal-500',    'border-teal-100'    ],
+                'chat':                  ['bg-[#0B4D73]/10','text-[#0B4D73]', 'border-[#0B4D73]/20'],
+            };
 
-                const [bg, ic, border] = colorMap[type] || ['bg-slate-50', 'text-[#0B4D73]', 'border-slate-100'];
+            const [bg, ic, border] = colorMap[type] || ['bg-slate-50', 'text-[#0B4D73]', 'border-slate-100'];
+            const chatIcon = (type === 'chat') ? 'fas fa-comment-dots' : iconClass;
 
-                toast.className = `pointer-events-auto bg-white/95 backdrop-blur-md border ${border} rounded-2xl shadow-2xl p-4 flex items-start gap-3 animate-fade-in transition-all duration-300 min-w-[290px] max-w-sm`;
+            const toast = document.createElement('div');
+            toast.className = `pointer-events-auto bg-white/95 backdrop-blur-md border ${border} rounded-2xl shadow-2xl p-4 flex items-start gap-3 animate-fade-in transition-all duration-300 min-w-[290px] max-w-sm`;
+            toast.innerHTML = `
+                <div class="w-10 h-10 rounded-xl ${bg} flex items-center justify-center shrink-0 mt-0.5">
+                    <i class="${chatIcon} ${ic} text-sm"></i>
+                </div>
+                <div class="flex-1 min-w-0 pt-0.5">
+                    <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">${type === 'chat' ? 'Community Message' : 'New Notification'}</p>
+                    <p class="text-sm font-bold text-slate-900 leading-snug line-clamp-2">${message}</p>
+                </div>
+                <button class="text-slate-300 hover:text-slate-500 transition-colors shrink-0 mt-0.5" aria-label="Dismiss">
+                    <i class="fas fa-times text-xs"></i>
+                </button>
+            `;
 
-                toast.innerHTML = `
-                    <div class="w-10 h-10 rounded-xl ${bg} flex items-center justify-center shrink-0 mt-0.5">
-                        <i class="${iconClass} ${ic} text-sm"></i>
-                    </div>
-                    <div class="flex-1 min-w-0 pt-0.5">
-                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">New Notification</p>
-                        <p class="text-sm font-bold text-slate-900 leading-snug line-clamp-2">${message}</p>
-                    </div>
-                    <button class="text-slate-300 hover:text-slate-500 transition-colors shrink-0 mt-0.5" aria-label="Dismiss">
-                        <i class="fas fa-times text-xs"></i>
-                    </button>
-                `;
+            toast.querySelector('button').onclick = () => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            };
 
-                toast.querySelector('button').onclick = () => {
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                if (toast.parentElement) {
                     toast.classList.add('opacity-0', 'translate-y-2');
                     setTimeout(() => toast.remove(), 300);
-                };
+                }
+            }, 8000);
+        }
 
-                container.appendChild(toast);
-
-                // Auto-dismiss after 8 seconds
-                setTimeout(() => {
-                    if (toast.parentElement) {
-                        toast.classList.add('opacity-0', 'translate-y-2');
-                        setTimeout(() => toast.remove(), 300);
-                    }
-                }, 8000);
-            }
-
-            // Poll every 15 seconds
-            setInterval(checkNotifications, 15000);
-            // Run immediately
-            checkNotifications();
+        // ── Boot ─────────────────────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', function () {
+            checkNotifications();                     // immediate check
+            setInterval(checkNotifications, POLL_INTERVAL);
         });
+
+        // Expose globally so chat.blade.php can call it after sending a message
+        window.checkNotificationsNow = checkNotifications;
+
+    })();
     </script>
 
     @yield('scripts')

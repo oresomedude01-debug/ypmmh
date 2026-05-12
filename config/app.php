@@ -136,4 +136,18 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Web Push (VAPID) Keys
+    |--------------------------------------------------------------------------
+    |
+    | These keys are used for the Web Push Protocol. You can generate them
+    | using 'npx web-push generate-vapid-keys'.
+    |
+    */
+
+    'vapid_public_key' => env('VAPID_PUBLIC_KEY'),
+    'vapid_private_key' => env('VAPID_PRIVATE_KEY'),
+
 ];
+

@@ -23,6 +23,29 @@
             @endif
         </div>
 
+        <!-- Push Notification Permission Banner -->
+        <div id="push-permission-banner" class="hidden glass rounded-2xl overflow-hidden border border-blue-100 shadow-sm bg-gradient-to-r from-blue-50 to-indigo-50">
+            <div class="px-6 py-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-900">Enable Desktop Notifications</h4>
+                        <p class="text-sm text-slate-600">Get instantly notified when new messages arrive in your community chats.</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 w-full md:w-auto shrink-0">
+                    <button onclick="dismissPushBanner()" class="px-4 py-2 text-sm font-bold text-slate-500 hover:text-slate-700 bg-white/50 hover:bg-white rounded-xl transition-colors flex-1 md:flex-none">
+                        Later
+                    </button>
+                    <button onclick="requestPushPermission()" class="px-5 py-2 text-sm font-bold text-white bg-[#0B4D73] hover:bg-[#093e5d] rounded-xl transition-colors shadow-sm flex-1 md:flex-none">
+                        Enable Notifications
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- Active Communities List -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @forelse($programs as $program)
@@ -65,3 +88,97 @@
         </div>
     </div>
 @endsection
+
+@section('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const banner = document.getElementById('push-permission-banner');
+        
+        // ── Push Subscription Helpers ─────────────────────────────────────────
+        function urlBase64ToUint8Array(base64String) {
+            const padding = '='.repeat((4 - base64String.length % 4) % 4);
+            const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+            const rawData = window.atob(base64);
+            const outputArray = new Uint8Array(rawData.length);
+            for (let i = 0; i < rawData.length; ++i) {
+                outputArray[i] = rawData.charCodeAt(i);
+            }
+            return outputArray;
+        }
+
+        // Only show if the browser supports notifications and we haven't asked yet or been denied
+        if ('Notification' in window && 'serviceWorker' in navigator) {
+            const hasDismissed = localStorage.getItem('push_banner_dismissed') === 'true';
+            
+            if (Notification.permission === 'default' && !hasDismissed) {
+                banner.classList.remove('hidden');
+            }
+        }
+        
+        window.dismissPushBanner = function() {
+            localStorage.setItem('push_banner_dismissed', 'true');
+            banner.classList.add('opacity-0', '-translate-y-4');
+            setTimeout(() => banner.classList.add('hidden'), 300);
+        };
+        
+        window.requestPushPermission = async function() {
+            try {
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') {
+                    // Register subscription with server
+                    await registerPushSubscription();
+                    
+                    if (typeof showToast === 'function') {
+                        showToast('Notifications enabled successfully!', 'success');
+                    }
+                    banner.classList.add('hidden');
+                } else {
+                    window.dismissPushBanner();
+                }
+            } catch (error) {
+                console.error("Error requesting permission:", error);
+                window.dismissPushBanner();
+            }
+        };
+
+        async function registerPushSubscription() {
+            try {
+                const registration = await navigator.serviceWorker.ready;
+                
+                // Get VAPID public key from server
+                const keyResponse = await fetch('/api/push/vapid-public-key');
+                const { vapidPublicKey } = await keyResponse.json();
+                
+                const subscription = await registration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
+                });
+
+                const p256dh = btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('p256dh'))));
+                const auth = btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('auth'))));
+
+                await fetch('/api/push/subscribe', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({
+                        endpoint: subscription.endpoint,
+                        public_key: p256dh,
+                        auth_token: auth,
+                        p256dh: p256dh, // redundant but expected by some schemas
+                        device_type: 'web',
+                        browser: navigator.userAgent,
+                        user_agent: navigator.userAgent
+                    })
+                });
+            } catch (error) {
+                console.error('Push registration failed:', error);
+                throw error;
+            }
+        }
+    });
+</script>
+@endsection

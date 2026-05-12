@@ -184,6 +184,9 @@
     let pollTimer   = null;
     const chatArea  = document.getElementById('chat-messages');
 
+    // Register current chat ID globally to suppress duplicate push notifications
+    window.currentChatProgramId = programId;
+
     // ─── Fetch & Render ─────────────────────────────────────────────────────
     async function fetchMessages() {
         try {
