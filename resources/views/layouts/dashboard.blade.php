@@ -287,14 +287,13 @@
         }
 
         @media (max-width: 768px) {
-            .main-content {
-                margin-left: 0;
-                padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
-            }
-
-            /* Hide sidebar by default on mobile */
             .sidebar {
                 transform: translateX(-100%);
+                /* Stop above the bottom navigation bar (~64px) */
+                height: calc(100dvh - 64px);
+                height: calc(100vh - 64px); /* fallback for browsers without dvh */
+                /* Account for safe-area (notched phones) */
+                padding-bottom: env(safe-area-inset-bottom, 0px);
             }
 
             .sidebar.open {
@@ -550,6 +549,11 @@
             }
 
             /* 4. Layout Hierarchy Fixes */
+            .main-content {
+                margin-left: 0;
+                padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+            }
+
             .admin-card { 
                 border-radius: 0.875rem !important; 
                 box-shadow: 0 2px 4px rgba(0,0,0,0.04) !important;
