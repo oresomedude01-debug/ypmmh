@@ -1,91 +1,66 @@
-@extends('layouts.guest')
+@extends('layouts.auth')
+@section('title', 'Set Your Password')
 
 @section('content')
-<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4">
-    <div class="w-full max-w-md">
-        <!-- Card -->
-        <div class="bg-white rounded-lg shadow-xl overflow-hidden">
-            <!-- Header -->
-            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-8 text-center">
-                <h1 class="text-3xl font-bold text-white mb-2">Welcome to YPMMH!</h1>
-                <p class="text-blue-100">Set Your Password</p>
+    <div class="w-full max-w-md px-4">
+        <div class="p-8 md:p-12 rounded-[2.5rem] glass animate-auth">
+            <!-- Brand Section -->
+            <div class="text-center mb-12">
+                <div class="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-2xl mb-8">
+                    <i class="fas fa-shield-halved text-4xl"></i>
+                </div>
+                <h1 class="text-3xl font-black tracking-tight mb-2">Welcome to YPMMH!</h1>
+                <p class="text-[var(--text-secondary)] font-medium">Set Your Secure Password</p>
             </div>
 
-            <!-- Content -->
-            <div class="px-6 py-8">
-                <p class="text-gray-600 text-center mb-6">
-                    Alhamdulillah! Your email has been verified successfully. 
-                    Please set your password to complete your registration.
-                </p>
+            <p class="text-[var(--text-secondary)] text-center mb-8 text-sm">
+                Alhamdulillah! Your email has been verified successfully. 
+                Please set your password to complete your registration.
+            </p>
 
-                <form action="{{ route('child.set-password.store') }}" method="POST" class="space-y-4">
-                    @csrf
+            <form action="{{ route('child.set-password.store') }}" method="POST" class="space-y-6">
+                @csrf
 
-                    <!-- Password Field -->
-                    <div>
-                        <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
-                            Password
-                        </label>
-                        <input 
-                            type="password" 
-                            id="password" 
-                            name="password"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                            placeholder="Enter your password"
-                            required
-                        >
-                        @error('password')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                        <p class="mt-1 text-xs text-gray-500">
-                            Must be at least 8 characters with uppercase, lowercase, and numbers
-                        </p>
-                    </div>
+                <!-- Password Input -->
+                <div class="form-group">
+                    <input type="password" id="password" name="password" class="form-input" placeholder=" " required autofocus>
+                    <label for="password" class="form-label">New Password</label>
+                    @error('password')
+                        <p class="text-red-500 text-xs mt-2 font-semibold"><i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}</p>
+                    @enderror
+                </div>
 
-                    <!-- Password Confirmation Field -->
-                    <div>
-                        <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">
-                            Confirm Password
-                        </label>
-                        <input 
-                            type="password" 
-                            id="password_confirmation" 
-                            name="password_confirmation"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                            placeholder="Confirm your password"
-                            required
-                        >
-                        @error('password_confirmation')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <!-- Submit Button -->
-                    <button 
-                        type="submit"
-                        class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition duration-200"
-                    >
-                        Set Password & Continue
-                    </button>
-                </form>
+                <!-- Confirm Password Input -->
+                <div class="form-group">
+                    <input type="password" id="password_confirmation" name="password_confirmation" class="form-input" placeholder=" " required>
+                    <label for="password_confirmation" class="form-label">Confirm Password</label>
+                    @error('password_confirmation')
+                        <p class="text-red-500 text-xs mt-2 font-semibold"><i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}</p>
+                    @enderror
+                </div>
 
                 <!-- Info Box -->
-                <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <p class="text-sm text-blue-800">
-                        <strong>Password Requirements:</strong><br>
-                        • At least 8 characters<br>
-                        • At least one uppercase letter<br>
-                        • At least one number<br>
-                        • At least one special character
-                    </p>
+                <div class="p-4 bg-blue-50/50 border border-blue-100 rounded-2xl mb-6">
+                    <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest mb-2">Security Requirements</p>
+                    <ul class="text-[11px] text-slate-600 space-y-1 font-medium">
+                        <li class="flex items-center gap-2"><i class="fas fa-check text-[8px]"></i> At least 8 characters</li>
+                        <li class="flex items-center gap-2"><i class="fas fa-check text-[8px]"></i> Uppercase & lowercase letters</li>
+                        <li class="flex items-center gap-2"><i class="fas fa-check text-[8px]"></i> At least one number</li>
+                    </ul>
                 </div>
-            </div>
-        </div>
 
-        <!-- Footer -->
-        <p class="text-center text-gray-600 text-sm mt-6">
-            Already have a password? <a href="{{ route('login') }}" class="text-blue-600 hover:text-blue-700 font-semibold">Log in here</a>
-        </p>
+                <!-- Submit Button -->
+                <button type="submit" class="w-full py-3 px-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl hover:shadow-xl transition-all duration-300 mt-8">
+                    Set Password & Continue
+                </button>
+            </form>
+
+            <!-- Login Link -->
+            <p class="text-center text-[var(--text-secondary)] text-sm mt-8">
+                Already have a password?
+                <a href="{{ route('login') }}" class="text-blue-600 font-semibold hover:underline">Log in here</a>
+            </p>
+        </div>
     </div>
-</div>
 @endsection
+
