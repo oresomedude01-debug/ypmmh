@@ -162,6 +162,21 @@ class UserController extends Controller
 
         if ($validated['role'] === 'Child') {
             app(AutoAssignChildService::class)->syncRollingPrograms($user);
+
+            // Generate a temporary signed URL for verification and password setup
+            $verificationUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+                'child.setup',
+                now()->addDays(7),
+                ['id' => $user->id, 'hash' => sha1($user->email)]
+            );
+
+            // Send Custom Welcome Email
+            \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\ChildWelcomeMail($user, $user->parent, $verificationUrl, $validated['password']));
+
+            // Notify Parent if exists
+            if ($user->parent) {
+                $user->parent->notify(new \App\Notifications\MenteeCreatedNotification($user));
+            }
         }
 
         return redirect()->route('admin.users.index')
@@ -386,6 +401,23 @@ class UserController extends Controller
                 // Assign role if valid
                 if (!empty(trim($role))) {
                     $user->assignRole(trim($role));
+                }
+
+                if ($user->hasRole('Child')) {
+                    // Generate a temporary signed URL for verification and password setup
+                    $verificationUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+                        'child.setup',
+                        now()->addDays(7),
+                        ['id' => $user->id, 'hash' => sha1($user->email)]
+                    );
+
+                    // Send Custom Welcome Email
+                    \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\ChildWelcomeMail($user, $user->parent ?? $user, $verificationUrl, 'password'));
+
+                    // Notify Parent if exists
+                    if ($user->parent) {
+                        $user->parent->notify(new \App\Notifications\MenteeCreatedNotification($user));
+                    }
                 }
 
                 $imported++;

@@ -37,9 +37,10 @@
                         'blog_published'         => ['fa-newspaper',      'bg-purple-50 text-purple-600'],
                         'blog_post'              => ['fa-newspaper',      'bg-indigo-50 text-indigo-600'],
                         'birthday'               => ['fa-birthday-cake',  'bg-pink-50 text-pink-600'],
+                        'mentee_created'         => ['fa-user-plus',      'bg-emerald-50 text-emerald-600'],
                     ];
                     [$iconClass, $iconBg] = $iconMap[$type] ?? ['fa-info-circle', 'bg-blue-50 text-[#0B4D73]'];
-
+ 
                     $labelMap = [
                         'new_program_available'  => 'New Course',
                         'program_update'         => 'Program Update',
@@ -48,6 +49,7 @@
                         'blog_published'         => 'New Article',
                         'blog_post'              => 'Blog Alert',
                         'birthday'               => 'Birthday',
+                        'mentee_created'         => 'Mentee Created',
                     ];
                     $label = $labelMap[$type] ?? 'Portal Alert';
                 @endphp

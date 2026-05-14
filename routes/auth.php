@@ -34,6 +34,11 @@ Route::middleware('guest')->group(function () {
 
     Route::post('reset-password', [NewPasswordController::class, 'store'])
         ->name('password.store');
+
+    // Automatic child account setup (verification + login)
+    Route::get('child/setup/{id}/{hash}', [ChildPasswordController::class, 'setup'])
+        ->middleware(['signed', 'throttle:6,1'])
+        ->name('child.setup');
 });
 
 Route::middleware('auth')->group(function () {

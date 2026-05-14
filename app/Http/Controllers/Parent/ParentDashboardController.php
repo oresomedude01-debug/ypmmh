@@ -78,13 +78,16 @@ class ParentDashboardController extends Controller
 
         // Create a temporary signed URL for verification and password setup
         $verificationUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(
-            'verification.verify',
-            now()->addDays(3),
+            'child.setup',
+            now()->addDays(7),
             ['id' => $child->id, 'hash' => sha1($child->email)]
         );
 
         // Send Custom Welcome Email with the verification link
-        \Illuminate\Support\Facades\Mail::to($child->email)->send(new \App\Mail\ChildWelcomeMail($child, Auth::user(), $verificationUrl));
+        \Illuminate\Support\Facades\Mail::to($child->email)->send(new \App\Mail\ChildWelcomeMail($child, Auth::user(), $verificationUrl, $defaultPassword));
+
+        // Notify Parent (In-app and Email)
+        Auth::user()->notify(new \App\Notifications\MenteeCreatedNotification($child));
 
         return redirect()->route('parent.dashboard')->with([
             'success' => $child->first_name . ' has been added successfully.',

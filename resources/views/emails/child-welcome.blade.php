@@ -104,7 +104,7 @@
                 <div class="credentials-box">
                     <h3 style="margin-top: 0; color: #0B4D73;">Your Login Details</h3>
                     <p>Email: <strong>{{ $child->email }}</strong></p>
-                    <p>Temporary Password: <strong>password123</strong></p>
+                    <p>Temporary Password: <strong>{{ $password }}</strong></p>
                 </div>
 
                 <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 0 4px 4px 0;">

@@ -11,6 +11,29 @@ use Illuminate\Validation\Rules\Password;
 class ChildPasswordController extends Controller
 {
     /**
+     * Handle automatic verification and login for child accounts
+     */
+    public function setup(Request $request, $id, $hash)
+    {
+        $user = \App\Models\User::findOrFail($id);
+
+        if (!hash_equals((string) $hash, sha1($user->getEmailForVerification()))) {
+            abort(403, 'Invalid verification link.');
+        }
+
+        if (!$user->hasVerifiedEmail()) {
+            $user->markEmailAsVerified();
+            event(new \Illuminate\Auth\Events\Verified($user));
+        }
+
+        // Log the user in
+        Auth::login($user);
+
+        return redirect()->route('child.set-password')
+            ->with('success', 'Email verified! Please set your new password to complete your account setup.');
+    }
+
+    /**
      * Show the set password form
      */
     public function show()
@@ -51,6 +74,6 @@ class ChildPasswordController extends Controller
             'must_change_password' => false,
         ]);
 
-        return redirect('/login')->with('success', 'Password set successfully! Please log in with your email and password.');
+        return redirect()->route('child.dashboard')->with('success', 'Password set successfully! Welcome to your dashboard.');
     }
 }

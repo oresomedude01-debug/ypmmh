@@ -31,6 +31,7 @@ class ChildWelcomeMail extends Mailable implements ShouldQueue
         public User $child,
         public User $parent,
         public string $verificationUrl,
+        public string $password,
     ) {}
 
 
@@ -55,6 +56,7 @@ class ChildWelcomeMail extends Mailable implements ShouldQueue
                 'child'  => $this->child,
                 'parent' => $this->parent,
                 'url'    => $this->verificationUrl,
+                'password' => $this->password,
             ],
         );
 

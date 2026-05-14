@@ -70,11 +70,28 @@
                                         $iconColor = '#3b82f6';
                                         $bgColor = 'rgba(59, 130, 246, 0.1)';
                                         $icon = 'fa-bell';
+                                        $type = $notification->data['type'] ?? '';
 
-                                        if (($notification->data['type'] ?? '') === 'birthday') {
+                                        if ($type === 'birthday') {
                                             $iconColor = '#ec4899';
                                             $bgColor = 'rgba(236, 72, 153, 0.1)';
                                             $icon = 'fa-birthday-cake';
+                                        } elseif ($type === 'mentee_created') {
+                                            $iconColor = '#10b981';
+                                            $bgColor = 'rgba(16, 185, 129, 0.1)';
+                                            $icon = 'fa-user-plus';
+                                        } elseif ($type === 'enrollment_request') {
+                                            $iconColor = '#f59e0b';
+                                            $bgColor = 'rgba(245, 158, 11, 0.1)';
+                                            $icon = 'fa-user-graduate';
+                                        } elseif ($type === 'program_update') {
+                                            $iconColor = '#0B4D73';
+                                            $bgColor = 'rgba(11, 77, 115, 0.1)';
+                                            $icon = 'fa-calendar-alt';
+                                        } elseif ($type === 'subscription_confirmed') {
+                                            $iconColor = '#8b5cf6';
+                                            $bgColor = 'rgba(139, 92, 246, 0.1)';
+                                            $icon = 'fa-check-double';
                                         }
                                     @endphp
                                     <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm"
